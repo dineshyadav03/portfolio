@@ -1,0 +1,13 @@
+.grid {
+  display: grid;
+}
+
+.dotOn {
+  border-radius: 50%;
+  background: var(--term-fg);
+}
+
+.dotOff {
+  border-radius: 50%;
+  background: transparent;
+}

@@ -1,0 +1,80 @@
+.wrap {
+  position: fixed;
+  /* Deliberately `top` + `dvh`, not `bottom: 14px`. On mobile browsers,
+     `position: fixed; bottom: Xpx` is measured against the *large* viewport
+     (window.innerHeight, which assumes browser chrome is hidden) rather
+     than the actually-visible viewport — pushing a bottom-anchored element
+     below what's on screen. `dvh` tracks the real visible viewport. Sprite
+     is 18 rows * 5px = 90px tall regardless of the mobile scale() below,
+     since transform doesn't affect layout box size. */
+  top: calc(100dvh - 104px);
+  z-index: 50;
+  cursor: pointer;
+  transition: left 3.5s ease-in-out;
+}
+
+.wrap[data-still="true"] {
+  transition: none;
+}
+
+.wrap:focus-visible {
+  outline: 2px solid var(--term-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.sprite {
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5));
+}
+
+/* A chunky, discrete-step bounce (not smooth easing) — smooth interpolation
+   on a crisp pixel-grid sprite looks blurry/wrong; real sprite animation
+   hops between a handful of fixed frames, which steps() gives us for free. */
+.wiggle {
+  animation: squashBounce 1.6s steps(4) infinite;
+  transform-origin: bottom center;
+}
+
+.wrap[data-still="true"] .wiggle {
+  animation: none;
+}
+
+@keyframes squashBounce {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+  25% {
+    transform: translateY(-2px) scaleY(1.04) scaleX(0.98);
+  }
+  50% {
+    transform: translateY(-4px) scaleY(1.07) scaleX(0.95);
+  }
+  75% {
+    transform: translateY(-2px) scaleY(1.03) scaleX(0.98);
+  }
+}
+
+.bubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  background: var(--term-titlebar);
+  border: 1px solid var(--term-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.68rem;
+  color: var(--term-fg);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    transform: scale(0.5);
+    transform-origin: bottom center;
+  }
+}

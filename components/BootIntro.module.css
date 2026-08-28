@@ -1,0 +1,101 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--page-bg);
+}
+
+.frameWrap {
+  position: relative;
+  width: min(88vw, 460px);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 3px dotted var(--term-border);
+}
+
+.titleText {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+
+.scene {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 32px 24px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.linkDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--term-accent);
+}
+
+.scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--term-accent);
+  box-shadow: 0 0 12px 2px var(--term-accent-glow);
+  pointer-events: none;
+}
+
+.accessRow {
+  padding: 0 24px 20px;
+}
+
+.accessLine {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--term-mint);
+}
+
+.accessCursor,
+.accessCursorIdle {
+  margin-left: 1px;
+  font-weight: 400;
+}
+
+.accessCursor {
+  animation: accessSolid 0.5s steps(1) infinite;
+}
+
+.accessCursorIdle {
+  animation: accessBlink 1s steps(1) infinite;
+}
+
+@keyframes accessSolid {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes accessBlink {
+  50% {
+    opacity: 0;
+  }
+}

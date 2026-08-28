@@ -1,0 +1,4 @@
+- [User profile](user_profile.md) — Dinesh Yadav, AI/FDE engineer, real social links, X bio content
+- [Portfolio overview](project_portfolio_overview.md) — current tech/design state, component behaviors, content TODOs
+- [Original, not copied](feedback_original_not_copied.md) — hard boundary on reference-site copying, how to handle it
+- [Dev verification quirks](feedback_dev_verification_quirks.md) — screenshot timing trick, piped exit-code gotcha

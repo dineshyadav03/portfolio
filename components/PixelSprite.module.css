@@ -1,0 +1,15 @@
+.grid {
+  display: grid;
+}
+
+.empty {
+  background: transparent;
+}
+
+.body {
+  background: #f2c14e;
+}
+
+.eye {
+  background: #160800;
+}

@@ -1,0 +1,16 @@
+.stage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  gap: 0;
+}
+
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}

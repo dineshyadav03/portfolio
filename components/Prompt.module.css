@@ -1,0 +1,53 @@
+.prompt {
+  margin: 0 0 18px;
+  font-size: 0.85rem;
+}
+
+.user {
+  color: var(--term-accent);
+  font-weight: 600;
+}
+
+.host {
+  color: var(--term-mint);
+  font-weight: 600;
+}
+
+.dim {
+  color: var(--term-fg-dim);
+}
+
+.command {
+  color: var(--term-fg);
+}
+
+.cursor,
+.cursorIdle {
+  display: inline-block;
+  width: 7px;
+  height: 0.95em;
+  margin-left: 2px;
+  background: var(--term-accent);
+  box-shadow: 0 0 10px 0 var(--term-accent-glow);
+  vertical-align: text-bottom;
+}
+
+.cursor {
+  animation: solid 0.5s steps(1) infinite;
+}
+
+.cursorIdle {
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes solid {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}

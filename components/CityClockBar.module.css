@@ -1,0 +1,21 @@
+.bar {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 10px;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+
+.brand {
+  color: var(--term-fg-dim);
+}
+
+.clocks {
+  display: flex;
+  gap: 16px;
+}

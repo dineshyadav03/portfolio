@@ -1,0 +1,35 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--term-muted);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  color: var(--term-fg);
+}
+
+.toggle:focus-visible {
+  outline: 1px solid var(--term-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--term-border);
+  flex-shrink: 0;
+}
+
+.dot[data-on="true"] {
+  background: var(--term-mint);
+  box-shadow: 0 0 5px 0 rgba(188, 214, 173, 0.6);
+}

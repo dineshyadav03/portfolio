@@ -1,0 +1,34 @@
+.bar {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 4px 0;
+  font-size: 0.72rem;
+  color: var(--term-fg-dim);
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hints,
+.clocks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sep {
+  opacity: 0.5;
+}
+
+.hints kbd {
+  font-family: inherit;
+  font-size: 0.68rem;
+  padding: 1px 5px;
+  border: 1px solid var(--term-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  color: var(--term-muted);
+  background: var(--term-titlebar);
+}

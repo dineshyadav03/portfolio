@@ -1,0 +1,35 @@
+.glitch {
+  animation: pageGlitch 7s infinite;
+}
+
+/* Mostly rest at the base state; the glitch is a short, sharp burst near
+   the end of each cycle rather than a constant wobble. */
+@keyframes pageGlitch {
+  0%,
+  95%,
+  100% {
+    filter: none;
+    transform: translate(0, 0);
+  }
+  95.4% {
+    filter: drop-shadow(-2px 0 #ff3b3b) drop-shadow(2px 0 #3bf0ff) contrast(1.15);
+    transform: translate(-2px, 1px);
+  }
+  95.8% {
+    filter: drop-shadow(2px 0 #ff3b3b) drop-shadow(-2px 0 #3bf0ff) contrast(1.25);
+    transform: translate(2px, -1px);
+  }
+  96.2% {
+    filter: none;
+    transform: translate(0, 0);
+  }
+  96.5% {
+    filter: drop-shadow(-1px 0 #ff3b3b) drop-shadow(1px 0 #3bf0ff);
+    transform: translate(-1px, 0);
+  }
+  96.8%,
+  100% {
+    filter: none;
+    transform: translate(0, 0);
+  }
+}

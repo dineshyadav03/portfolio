@@ -1,69 +1,64 @@
-import Image from "next/image";
+"use client";
+
+import { motion } from "framer-motion";
+import AsciiPortrait from "@/components/AsciiPortrait";
+import AnnouncementBanner from "@/components/AnnouncementBanner";
+import BuildStatusPanel from "@/components/BuildStatusPanel";
+import DotIcon from "@/components/DotIcon";
+import PageGlitch from "@/components/PageGlitch";
+import Prompt from "@/components/Prompt";
+import StatusReadout from "@/components/StatusReadout";
+import { profile } from "@/lib/content";
+import { textToDotBitmap } from "@/lib/dotFont";
+import { fadeUp, listContainer, listItem } from "@/lib/motion";
 import styles from "./page.module.css";
+
+const WORDMARK = textToDotBitmap(profile.handle);
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <PageGlitch>
+      <motion.div
+        className={styles.wordmark}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <DotIcon bitmap={WORDMARK} label={profile.name} dot={3} gap={1.5} />
+      </motion.div>
+      <Prompt command="whoami" />
+      <div className={styles.hero}>
+        <motion.div
+          className={styles.portrait}
+          initial="hidden"
+          animate="show"
+          variants={fadeUp}
+        >
+          <AsciiPortrait />
+        </motion.div>
+        <motion.div
+          className={styles.intro}
+          initial="hidden"
+          animate="show"
+          variants={listContainer}
+        >
+          <motion.p className={styles.role} variants={listItem}>
+            {profile.tagline}
+            <span className={styles.cursor} aria-hidden="true" />
+          </motion.p>
+          {profile.bio.map((line) => (
+            <motion.p key={line} className={styles.bioLine} variants={listItem}>
+              {line}
+            </motion.p>
+          ))}
+        </motion.div>
+      </div>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+        <Prompt command="cat status.txt" />
+        <StatusReadout />
+        <AnnouncementBanner />
+        <BuildStatusPanel />
+      </motion.div>
+    </PageGlitch>
   );
 }

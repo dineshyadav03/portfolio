@@ -1,0 +1,90 @@
+.wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.art {
+  margin: 0;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.42rem;
+  line-height: 0.95;
+  letter-spacing: 0;
+  color: var(--term-fg-dim);
+  white-space: pre;
+  user-select: none;
+}
+
+@media (min-width: 480px) {
+  .art {
+    font-size: 0.5rem;
+  }
+}
+
+.layerRed,
+.layerCyan {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.layerRed {
+  color: #ff3b3b;
+  animation: glitchRed 7s infinite;
+}
+
+.layerCyan {
+  color: #3bf0ff;
+  animation: glitchCyan 7s infinite;
+}
+
+@keyframes glitchRed {
+  0%,
+  91%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  92% {
+    opacity: 0.7;
+    transform: translate(-2px, 1px);
+    clip-path: inset(15% 0 55% 0);
+  }
+  93% {
+    opacity: 0.6;
+    transform: translate(1px, -1px);
+    clip-path: inset(60% 0 5% 0);
+  }
+  94% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes glitchCyan {
+  0%,
+  91.5%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  92.5% {
+    opacity: 0.6;
+    transform: translate(2px, 0);
+    clip-path: inset(35% 0 30% 0);
+  }
+  93.5% {
+    opacity: 0.5;
+    transform: translate(-1px, 1px);
+    clip-path: inset(5% 0 70% 0);
+  }
+  94.5% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+}

@@ -23,6 +23,40 @@ export function globeBitmap(size = 22): boolean[][] {
   return grid;
 }
 
+export function sadFaceBitmap(size = 22): boolean[][] {
+  const cx = (size - 1) / 2;
+  const eyeY = Math.round(size * 0.34);
+  const eyeHalf = Math.max(1, Math.round(size * 0.06));
+  const eyeOffset = Math.round(size * 0.22);
+  const mouthY = Math.round(size * 0.62);
+  const mouthHalf = size * 0.28;
+  const mouthDroop = size * 0.16;
+
+  const grid: boolean[][] = [];
+  for (let y = 0; y < size; y++) {
+    const row: boolean[] = [];
+    for (let x = 0; x < size; x++) {
+      let on = false;
+
+      // Two blank-stare square eyes.
+      for (const ex of [cx - eyeOffset, cx + eyeOffset]) {
+        if (Math.abs(x - ex) <= eyeHalf && Math.abs(y - eyeY) <= eyeHalf) on = true;
+      }
+
+      // A downward-drooping frown: corners sit lower than the center.
+      const dx = (x - cx) / mouthHalf;
+      if (Math.abs(dx) <= 1) {
+        const curveY = mouthY + mouthDroop * dx * dx;
+        if (Math.abs(y - curveY) < 0.75) on = true;
+      }
+
+      row.push(on);
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
 export function laptopBitmap(width = 22, height = 20): boolean[][] {
   const grid: boolean[][] = [];
   for (let y = 0; y < height; y++) {

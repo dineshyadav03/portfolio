@@ -121,3 +121,26 @@ export function playGreetChirp() {
   tone(ctx, 920, now, 0.07, 0.08);
   tone(ctx, 1300, now + 0.055, 0.09, 0.08);
 }
+
+/** A short ascending three-note arpeggio — the "all systems online" moment
+ * once the boot HUD dashboard comes up after ACCESS GRANTED. */
+export function playSystemReady() {
+  if (!isSoundEnabled()) return;
+  const ctx = getContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  tone(ctx, 523, now, 0.09, 0.07);
+  tone(ctx, 659, now + 0.08, 0.09, 0.07);
+  tone(ctx, 784, now + 0.16, 0.16, 0.08);
+}
+
+/** A low, descending two-note tone for the error screen — the inverse
+ * shape of the boot chime, so it reads as "something went down." */
+export function playErrorTone() {
+  if (!isSoundEnabled()) return;
+  const ctx = getContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  tone(ctx, 340, now, 0.16, 0.08);
+  tone(ctx, 220, now + 0.13, 0.22, 0.08);
+}

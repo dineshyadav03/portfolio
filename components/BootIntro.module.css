@@ -13,6 +13,11 @@
   width: min(88vw, 460px);
   border-radius: 10px;
   overflow: hidden;
+  transition: width 0.3s ease;
+}
+
+.frameWide {
+  width: min(92vw, 560px);
 }
 
 .titlebar {

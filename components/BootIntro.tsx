@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import BootHud from "./BootHud";
 import DotIcon from "./DotIcon";
 import DottedFrame from "./DottedFrame";
 import { globeBitmap, laptopBitmap } from "@/lib/dotIcons";
-import { playBootChime, playKeyClick } from "@/lib/sound";
+import { playBootChime, playKeyClick, playSystemReady } from "@/lib/sound";
 import styles from "./BootIntro.module.css";
 
 const GLOBE = globeBitmap();
@@ -15,12 +16,17 @@ const CORNER_ICON = [
   [true, true],
 ];
 
-// Slightly longer than the original 1s so "ACCESS GRANTED" has room to type
-// out and be read after the connection animation finishes.
-const VISIBLE_MS = 1650;
 const ACCESS_TEXT = "ACCESS GRANTED";
 const ACCESS_START_MS = 400; // starts 0.4s after the overlay mounts
 const ACCESS_STEP_MS = 35; // per-character typing speed
+const READ_PAUSE_MS = 350; // beat to actually read "ACCESS GRANTED" before the HUD takes over
+
+// Phase 1 (connection handshake + typed "ACCESS GRANTED") hands off to
+// phase 2 (the systems-online HUD dashboard) once typing finishes, then
+// the whole overlay clears.
+const PHASE1_MS = ACCESS_START_MS + ACCESS_TEXT.length * ACCESS_STEP_MS + READ_PAUSE_MS;
+const HUD_MS = 3000;
+const VISIBLE_MS = PHASE1_MS + HUD_MS;
 
 function Reveal({
   children,
@@ -86,6 +92,7 @@ function TypedLine({
 export default function BootIntro() {
   const reduced = useReducedMotion();
   const [visible, setVisible] = useState(false);
+  const [phase, setPhase] = useState<"connect" | "hud">("connect");
 
   useEffect(() => {
     if (reduced) return;
@@ -94,9 +101,17 @@ export default function BootIntro() {
     // it's reliably visible each time the site is opened or reloaded.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(true);
+    setPhase("connect");
     playBootChime();
+    const toHud = setTimeout(() => {
+      setPhase("hud");
+      playSystemReady();
+    }, PHASE1_MS);
     const hide = setTimeout(() => setVisible(false), VISIBLE_MS);
-    return () => clearTimeout(hide);
+    return () => {
+      clearTimeout(toHud);
+      clearTimeout(hide);
+    };
   }, [reduced]);
 
   return (
@@ -109,59 +124,86 @@ export default function BootIntro() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
-          <div className={styles.frameWrap}>
+          <div className={phase === "hud" ? `${styles.frameWrap} ${styles.frameWide}` : styles.frameWrap}>
             <DottedFrame>
-              <motion.div
-                className={styles.scanline}
-                initial={{ top: "0%", opacity: 1 }}
-                animate={{ top: "100%", opacity: 0 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-                aria-hidden="true"
-              />
+              {phase === "connect" && (
+                <motion.div
+                  className={styles.scanline}
+                  initial={{ top: "0%", opacity: 1 }}
+                  animate={{ top: "100%", opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  aria-hidden="true"
+                />
+              )}
               <motion.div
                 className={styles.titlebar}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.15 }}
               >
-                <span className={styles.titleText}>establishing connection</span>
+                <span className={styles.titleText}>
+                  {phase === "connect" ? "establishing connection" : "systems online"}
+                </span>
                 <DotIcon bitmap={CORNER_ICON} label="" dot={3} gap={2} />
               </motion.div>
-              <div className={styles.scene}>
-                <Reveal delay={0.05}>
-                  <DotIcon bitmap={GLOBE} label="Internet" dot={4} gap={1.5} />
-                </Reveal>
-                <div className={styles.link} aria-hidden="true">
-                  {[0, 1, 2, 3].map((i) => (
-                    <motion.span
-                      key={i}
-                      className={styles.linkDot}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: [0, 1, 0.25, 1], scale: 1 }}
-                      transition={{
-                        opacity: {
-                          duration: 0.5,
-                          repeat: Infinity,
-                          repeatDelay: 0.1,
-                          delay: 0.35 + i * 0.07,
-                          ease: "easeInOut",
-                        },
-                        scale: { duration: 0.15, delay: 0.35 + i * 0.07 },
-                      }}
-                    />
-                  ))}
-                </div>
-                <Reveal delay={0.25}>
-                  <DotIcon bitmap={LAPTOP} label="Your device" dot={4} gap={1.5} />
-                </Reveal>
-              </div>
-              <div className={styles.accessRow} aria-hidden="true">
-                <TypedLine
-                  text={ACCESS_TEXT}
-                  startDelayMs={ACCESS_START_MS}
-                  stepMs={ACCESS_STEP_MS}
-                />
-              </div>
+
+              <AnimatePresence mode="wait">
+                {phase === "connect" ? (
+                  <motion.div
+                    key="connect"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className={styles.scene}>
+                      <Reveal delay={0.05}>
+                        <DotIcon bitmap={GLOBE} label="Internet" dot={4} gap={1.5} />
+                      </Reveal>
+                      <div className={styles.link} aria-hidden="true">
+                        {[0, 1, 2, 3].map((i) => (
+                          <motion.span
+                            key={i}
+                            className={styles.linkDot}
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: [0, 1, 0.25, 1], scale: 1 }}
+                            transition={{
+                              opacity: {
+                                duration: 0.5,
+                                repeat: Infinity,
+                                repeatDelay: 0.1,
+                                delay: 0.35 + i * 0.07,
+                                ease: "easeInOut",
+                              },
+                              scale: { duration: 0.15, delay: 0.35 + i * 0.07 },
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <Reveal delay={0.25}>
+                        <DotIcon bitmap={LAPTOP} label="Your device" dot={4} gap={1.5} />
+                      </Reveal>
+                    </div>
+                    <div className={styles.accessRow} aria-hidden="true">
+                      <TypedLine
+                        text={ACCESS_TEXT}
+                        startDelayMs={ACCESS_START_MS}
+                        stepMs={ACCESS_STEP_MS}
+                      />
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="hud"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <BootHud />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </DottedFrame>
           </div>
         </motion.div>

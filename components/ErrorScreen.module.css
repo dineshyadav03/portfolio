@@ -1,0 +1,100 @@
+.overlay {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--page-bg);
+  color: var(--term-fg);
+}
+
+.frameWrap {
+  position: relative;
+  width: min(88vw, 420px);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 3px dotted var(--term-border);
+}
+
+.titleText {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+
+.blinkDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--term-accent);
+  box-shadow: 0 0 8px 1px var(--term-accent-glow);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 32px 24px 28px;
+  text-align: center;
+  /* Overrides --term-fg within this subtree only, so the shared DotIcon
+     dots render in the accent color here without a color prop. */
+  --term-fg: var(--term-accent);
+}
+
+.heading {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--term-fg-dim);
+}
+
+.detail {
+  margin: -8px 0 0;
+  max-width: 32ch;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--term-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.action {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--term-fg-dim);
+  background: transparent;
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.action:hover {
+  color: var(--term-fg);
+  border-color: var(--term-muted);
+}

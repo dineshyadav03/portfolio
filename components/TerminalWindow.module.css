@@ -7,8 +7,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-bottom: 10px;
-  margin-bottom: 24px;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
   border-bottom: 1px solid var(--term-border);
 }
 
@@ -25,7 +25,7 @@
 }
 
 .kicker {
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.08em;

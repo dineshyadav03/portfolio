@@ -31,3 +31,21 @@
   color: var(--term-fg);
   white-space: nowrap;
 }
+
+/* Long values (e.g. the focus line) can't stay on one line on narrow
+   screens without overflowing the page — drop the dotted leader and let
+   the value wrap onto its own line instead. */
+@media (max-width: 480px) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .leader {
+    display: none;
+  }
+
+  .row dd {
+    white-space: normal;
+    flex-basis: 100%;
+  }
+}

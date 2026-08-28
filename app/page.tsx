@@ -13,7 +13,7 @@ import { textToDotBitmap } from "@/lib/dotFont";
 import { fadeUp, listContainer, listItem } from "@/lib/motion";
 import styles from "./page.module.css";
 
-const WORDMARK = textToDotBitmap(profile.handle);
+const WORDMARK = textToDotBitmap(profile.name);
 
 export default function Home() {
   return (

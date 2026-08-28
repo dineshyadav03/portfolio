@@ -1,12 +1,14 @@
 .wrap {
   position: relative;
   display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .art {
   margin: 0;
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.42rem;
+  font-size: 0.4rem;
   line-height: 0.95;
   letter-spacing: 0;
   color: var(--term-fg-dim);

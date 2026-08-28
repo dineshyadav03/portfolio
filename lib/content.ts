@@ -74,6 +74,13 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    name: "portfolio (this site)",
+    description:
+      "This very site — a terminal-styled personal portfolio built with Next.js: a persistent boot sequence, an interactive command line, a procedurally generated ASCII portrait and pixel mascot, page-load system sounds, and no hand-written pixel art or audio assets — everything's generated in code.",
+    href: "https://github.com/dineshyadav03/portfolio",
+    stack: ["Next.js", "TypeScript", "Framer Motion"],
+  },
+  {
     name: "cody",
     description:
       "An AI coding mentor built as a Claude Code Skills package — points at a real repo, assesses your level, builds a real-code-grounded curriculum, teaches theory + hands-on practice, and quizzes you as you go. No LLM SDK in the repo at all; it works by scaffolding plain-English Skill instruction files that Claude Code reads and follows live.",

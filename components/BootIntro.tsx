@@ -7,6 +7,7 @@ import DotIcon from "./DotIcon";
 import DottedFrame from "./DottedFrame";
 import { globeBitmap, laptopBitmap } from "@/lib/dotIcons";
 import { playBootChime, playKeyClick, playSystemReady } from "@/lib/sound";
+import { ACCESS_START_MS, ACCESS_STEP_MS, ACCESS_TEXT, BOOT_VISIBLE_MS, PHASE1_MS } from "@/lib/bootTiming";
 import styles from "./BootIntro.module.css";
 
 const GLOBE = globeBitmap();
@@ -15,18 +16,6 @@ const CORNER_ICON = [
   [true, true],
   [true, true],
 ];
-
-const ACCESS_TEXT = "ACCESS GRANTED";
-const ACCESS_START_MS = 400; // starts 0.4s after the overlay mounts
-const ACCESS_STEP_MS = 35; // per-character typing speed
-const READ_PAUSE_MS = 350; // beat to actually read "ACCESS GRANTED" before the HUD takes over
-
-// Phase 1 (connection handshake + typed "ACCESS GRANTED") hands off to
-// phase 2 (the systems-online HUD dashboard) once typing finishes, then
-// the whole overlay clears.
-const PHASE1_MS = ACCESS_START_MS + ACCESS_TEXT.length * ACCESS_STEP_MS + READ_PAUSE_MS;
-const HUD_MS = 3000;
-const VISIBLE_MS = PHASE1_MS + HUD_MS;
 
 function Reveal({
   children,
@@ -107,7 +96,7 @@ export default function BootIntro() {
       setPhase("hud");
       playSystemReady();
     }, PHASE1_MS);
-    const hide = setTimeout(() => setVisible(false), VISIBLE_MS);
+    const hide = setTimeout(() => setVisible(false), BOOT_VISIBLE_MS);
     return () => {
       clearTimeout(toHud);
       clearTimeout(hide);
@@ -121,8 +110,8 @@ export default function BootIntro() {
           className={styles.overlay}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          exit={{ opacity: 0, scale: 0.97 }}
+          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
         >
           <div className={phase === "hud" ? `${styles.frameWrap} ${styles.frameWide}` : styles.frameWrap}>
             <DottedFrame>

@@ -12,6 +12,20 @@
   --page-bg: #000000;
 }
 
+:root[data-theme="light"] {
+  --term-bg: #f5f1e8;
+  --term-titlebar: #ece3d0;
+  --term-border: #d9cfba;
+  --term-fg: #241f16;
+  --term-fg-dim: #5c5340;
+  --term-muted: #7a7059;
+  --term-accent: #d9490f;
+  --term-accent-glow: rgba(217, 73, 15, 0.25);
+  --term-mint: #3f6b30;
+  --term-selection: #d9490f;
+  --page-bg: #f5f1e8;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -21,12 +35,24 @@ body {
   height: 100%;
 }
 
+/* The page still scrolls — just without the browser's default scrollbar
+   chrome, which clashes with the custom terminal look. */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   margin: 0;
   background: var(--page-bg);
   color: var(--term-fg);
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {

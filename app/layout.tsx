@@ -11,6 +11,8 @@ import PageTransition from "@/components/PageTransition";
 import BootIntro from "@/components/BootIntro";
 import CityClockBar from "@/components/CityClockBar";
 import Mascot from "@/components/Mascot";
+import ScrollHint from "@/components/ScrollHint";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const mono = Geist_Mono({
   variable: "--font-mono",
@@ -26,6 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={mono.variable}>
       <body>
+        {/* Sets data-theme before first paint so the page never flashes the
+            wrong theme while React hydrates. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <a href="#main" className="skipLink">
           Skip to content
         </a>
@@ -34,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MotionConfig reducedMotion="user">
           <BootIntro />
           <Mascot />
+          <ScrollHint />
           <div className={styles.stage}>
             <main id="main" className={styles.mainCol}>
               <CityClockBar />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import SoundToggle from "./SoundToggle";
+import ThemeToggle from "./ThemeToggle";
 import styles from "./StatusBar.module.css";
 
 const IST_FORMATTER = new Intl.DateTimeFormat("en-IN", {
@@ -43,6 +44,10 @@ export default function StatusBar() {
           ·
         </span>
         <SoundToggle />
+        <span className={styles.sep} aria-hidden="true">
+          ·
+        </span>
+        <ThemeToggle />
       </div>
       <div className={styles.clocks} suppressHydrationWarning>
         {now ? (

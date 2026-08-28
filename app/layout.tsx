@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { MotionConfig } from "framer-motion";
 import "./globals.css";
 import styles from "./layout.module.css";
@@ -26,11 +27,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={mono.variable}>
+    <html lang="en" className={mono.variable} suppressHydrationWarning>
       <body>
         {/* Sets data-theme before first paint so the page never flashes the
             wrong theme while React hydrates. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
         <a href="#main" className="skipLink">
           Skip to content
         </a>

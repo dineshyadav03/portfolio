@@ -7,23 +7,40 @@ import { mascotBitmap } from "@/lib/mascotBitmap";
 import { playGreetChirp } from "@/lib/sound";
 import styles from "./Mascot.module.css";
 
-const SPRITE_OPEN = mascotBitmap(17, 18, true);
-const SPRITE_CLOSED = mascotBitmap(17, 18, false);
+const SPRITE_OPEN = mascotBitmap(19, 18, true, false);
+const SPRITE_CLOSED = mascotBitmap(19, 18, false, false);
+const SPRITE_WAVE = mascotBitmap(19, 18, true, true);
 const GREETINGS = ["hi, i'm nia", "poking around too?", "this site's still growing", "*waves*"];
+const AMBIENT_INTERVAL_MS = 6000;
+const BUBBLE_MS = 2000;
+
+// Keeps Nia off to the right, clear of the body text she used to wander
+// across. Positioned via `right`, not `left` — anchoring from the right
+// edge means her own width extends *inward* from wherever she sits, so
+// she can never be pushed past the edge of the viewport the way a `left`
+// percentage close to 100% would (left:96% plus her own ~95px width runs
+// well past the right edge on most screens). She starts pinned closest to
+// the right edge of this band.
+const WANDER_MIN = 4;
+const WANDER_MAX = 30;
 
 export default function Mascot() {
   const reduced = useReducedMotion();
-  const [left, setLeft] = useState(50);
+  const [right, setRight] = useState(WANDER_MIN);
   const [facing, setFacing] = useState(1);
   const [eyesOpen, setEyesOpen] = useState(true);
   const [greeting, setGreeting] = useState<string | null>(null);
+  const [waving, setWaving] = useState(false);
 
   useEffect(() => {
     if (reduced) return;
     const id = setInterval(() => {
-      setLeft((prev) => {
-        const next = Math.max(4, Math.min(92, prev + (Math.random() * 46 - 23)));
-        setFacing(next >= prev ? 1 : -1);
+      setRight((prev) => {
+        const next = Math.max(WANDER_MIN, Math.min(WANDER_MAX, prev + (Math.random() * 20 - 10)));
+        // Facing follows movement direction on screen: growing `right`
+        // means drifting further left, so the comparison is inverted
+        // relative to the old `left`-based version.
+        setFacing(next >= prev ? -1 : 1);
         return next;
       });
     }, 4500);
@@ -40,16 +57,34 @@ export default function Mascot() {
     return () => clearInterval(id);
   }, [reduced]);
 
-  function handleActivate() {
-    playGreetChirp();
+  function showBubble(withSound: boolean) {
+    if (withSound) playGreetChirp();
     setGreeting(GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
-    setTimeout(() => setGreeting(null), 2000);
+    setWaving(true);
+    setTimeout(() => {
+      setGreeting(null);
+      setWaving(false);
+    }, BUBBLE_MS);
   }
+
+  // She speaks up on her own every so often, not just when clicked — a
+  // sign of life rather than a one-shot easter egg.
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => showBubble(false), AMBIENT_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [reduced]);
+
+  function handleActivate() {
+    showBubble(true);
+  }
+
+  const sprite = waving ? SPRITE_WAVE : eyesOpen ? SPRITE_OPEN : SPRITE_CLOSED;
 
   return (
     <div
       className={styles.wrap}
-      style={{ left: `${left}%` }}
+      style={{ right: `${right}%` }}
       data-still={reduced ? "true" : undefined}
       onClick={handleActivate}
       role="button"
@@ -65,7 +100,7 @@ export default function Mascot() {
       {greeting && <div className={styles.bubble}>{greeting}</div>}
       <div className={styles.sprite} style={{ transform: `scaleX(${facing})` }}>
         <div className={styles.wiggle}>
-          <PixelSprite bitmap={eyesOpen ? SPRITE_OPEN : SPRITE_CLOSED} size={5} />
+          <PixelSprite bitmap={sprite} size={5} />
         </div>
       </div>
     </div>

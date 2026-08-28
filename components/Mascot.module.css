@@ -10,7 +10,7 @@
   top: calc(100dvh - 104px);
   z-index: 50;
   cursor: pointer;
-  transition: left 3.5s ease-in-out;
+  transition: right 3.5s ease-in-out;
 }
 
 .wrap[data-still="true"] {

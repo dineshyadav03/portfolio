@@ -61,9 +61,11 @@ export const announcement = {
 };
 
 export const buildStatus = {
-  percent: 40, // TODO: bump this up as you replace TODO placeholders with real content
-  detail: "2 of 5 sections finalized",
-  eta: "TODO",
+  // about / creations / contact have real content; reflections is still an
+  // honest empty state and the resume link isn't hooked up yet — bump this
+  // as those fill in.
+  percent: 75,
+  detail: "3 of 4 sections finalized — reflections pending",
 };
 
 export type Project = {

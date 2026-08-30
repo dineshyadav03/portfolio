@@ -1,9 +1,9 @@
 .nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 22px;
-  margin-bottom: 28px;
-  padding-bottom: 18px;
+  gap: 18px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--term-border);
 }
 

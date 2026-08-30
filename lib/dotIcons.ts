@@ -57,6 +57,87 @@ export function sadFaceBitmap(size = 22): boolean[][] {
   return grid;
 }
 
+// A bird in flight: a bent two-segment wing (shoulder -> elbow -> tip, like
+// a real wing joint) on each side, a solid body, a head with a beak, and a
+// fanned tail. Two frames (up/down) meant to be alternated quickly to read
+// as a flap cycle.
+export function birdBitmap(width = 34, height = 18, wingsUp = true): boolean[][] {
+  const cx = Math.round((width - 1) / 2);
+  const bodyY = Math.round(height * 0.58);
+  const bodyRx = 3.2;
+  const bodyRy = 2.1;
+  const halfSpan = Math.floor(width / 2) - 2; // leaves room for the head/beak
+  const grid: boolean[][] = Array.from({ length: height }, () => new Array(width).fill(false));
+
+  const setDot = (x: number, y: number) => {
+    if (x >= 0 && x < width && y >= 0 && y < height) grid[y][x] = true;
+  };
+
+  const fillDisc = (dcx: number, dcy: number, r: number) => {
+    for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) {
+      for (let dx = -Math.ceil(r); dx <= Math.ceil(r); dx++) {
+        if (dx * dx + dy * dy <= r * r) setDot(dcx + dx, dcy + dy);
+      }
+    }
+  };
+
+  // Draws a straight, tapered band from (fromDx, fromY) to (toDx, toY),
+  // both relative to the body center, thickness interpolated along it.
+  const drawSegment = (
+    fromDx: number,
+    fromY: number,
+    toDx: number,
+    toY: number,
+    thickStart: number,
+    thickEnd: number,
+  ) => {
+    const steps = Math.max(1, Math.round(Math.abs(toDx - fromDx)));
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const dx = fromDx + (toDx - fromDx) * t;
+      const y = fromY + (toY - fromY) * t;
+      const thickness = thickStart + (thickEnd - thickStart) * t;
+      const half = thickness / 2;
+      for (let o = -Math.floor(half); o <= Math.ceil(half) - 1; o++) {
+        setDot(cx + Math.round(dx), Math.round(y) + o);
+      }
+    }
+  };
+
+  for (const side of [-1, 1]) {
+    const elbowDx = side * Math.round(halfSpan * 0.42);
+    const elbowY = wingsUp ? bodyY - height * 0.22 : bodyY + height * 0.14;
+    const tipDx = side * halfSpan;
+    const tipY = wingsUp ? bodyY - height * 0.62 : bodyY + height * 0.5;
+    drawSegment(0, bodyY, elbowDx, elbowY, 3.6, 2.6);
+    drawSegment(elbowDx, elbowY, tipDx, tipY, 2.6, 1);
+  }
+
+  // Solid body, drawn last so it reads as the torso mass over the wing roots.
+  for (let dyi = -Math.ceil(bodyRy); dyi <= Math.ceil(bodyRy); dyi++) {
+    for (let dxi = -Math.ceil(bodyRx); dxi <= Math.ceil(bodyRx); dxi++) {
+      const nx = dxi / bodyRx;
+      const ny = dyi / bodyRy;
+      if (nx * nx + ny * ny <= 1) setDot(cx + dxi, bodyY + dyi);
+    }
+  }
+
+  // Head + beak ahead of the body (direction of flight).
+  const headCx = cx + Math.ceil(bodyRx) + 1;
+  fillDisc(headCx, bodyY - 1, 1.3);
+  setDot(headCx + 2, bodyY - 1);
+
+  // A small fanned tail behind the body.
+  const tailX = cx - Math.ceil(bodyRx) - 1;
+  setDot(tailX, bodyY - 2);
+  setDot(tailX, bodyY - 1);
+  setDot(tailX, bodyY + 1);
+  setDot(tailX, bodyY + 2);
+  setDot(tailX - 1, bodyY);
+
+  return grid;
+}
+
 export function laptopBitmap(width = 22, height = 20): boolean[][] {
   const grid: boolean[][] = [];
   for (let y = 0; y < height; y++) {

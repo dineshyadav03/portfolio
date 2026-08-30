@@ -5,17 +5,29 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import BootHud from "./BootHud";
 import DotIcon from "./DotIcon";
 import DottedFrame from "./DottedFrame";
-import { globeBitmap, laptopBitmap } from "@/lib/dotIcons";
+import { birdBitmap, globeBitmap, laptopBitmap } from "@/lib/dotIcons";
 import { playBootChime, playKeyClick, playSystemReady } from "@/lib/sound";
-import { ACCESS_START_MS, ACCESS_STEP_MS, ACCESS_TEXT, BOOT_VISIBLE_MS, PHASE1_MS } from "@/lib/bootTiming";
+import {
+  ACCESS_START_MS,
+  ACCESS_STEP_MS,
+  ACCESS_TEXT,
+  BOOT_VISIBLE_MS,
+  HUD_MS,
+  PHASE1_MS,
+  WELCOME_START_MS,
+  WELCOME_TEXT,
+} from "@/lib/bootTiming";
 import styles from "./BootIntro.module.css";
 
 const GLOBE = globeBitmap();
 const LAPTOP = laptopBitmap();
+const BIRD_UP = birdBitmap();
+const BIRD_DOWN = birdBitmap(34, 18, false);
 const CORNER_ICON = [
   [true, true],
   [true, true],
 ];
+const WELCOME_TO_HIDE_MS = HUD_MS; // when phase flips to "welcome", relative offset before hide
 
 function Reveal({
   children,
@@ -78,10 +90,89 @@ function TypedLine({
   );
 }
 
+const DECRYPT_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%*+=-";
+
+function randomGlyph() {
+  return DECRYPT_GLYPHS[Math.floor(Math.random() * DECRYPT_GLYPHS.length)];
+}
+
+// A "decrypting" text reveal: characters scramble through random glyphs
+// and lock in left to right, instead of a plain typewriter — an original
+// take on the genre (own implementation, not a pulled-in component).
+function DecryptLine({
+  text,
+  startDelayMs,
+  className,
+}: {
+  text: string;
+  startDelayMs: number;
+  className?: string;
+}) {
+  const [display, setDisplay] = useState(() => text.replace(/[^ ]/g, " "));
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    let count = 0;
+    let scrambleId: ReturnType<typeof setInterval> | undefined;
+    let revealId: ReturnType<typeof setInterval> | undefined;
+
+    const render = () => {
+      setDisplay(
+        text
+          .split("")
+          .map((c, i) => (c === " " ? " " : i < count ? c : randomGlyph()))
+          .join(""),
+      );
+    };
+
+    const startId = setTimeout(() => {
+      scrambleId = setInterval(render, 45);
+      revealId = setInterval(() => {
+        count += 1;
+        playKeyClick();
+        render();
+        if (count >= text.length) {
+          if (revealId) clearInterval(revealId);
+          if (scrambleId) clearInterval(scrambleId);
+          setDone(true);
+        }
+      }, 70);
+    }, startDelayMs);
+
+    return () => {
+      clearTimeout(startId);
+      if (revealId) clearInterval(revealId);
+      if (scrambleId) clearInterval(scrambleId);
+    };
+  }, [text, startDelayMs]);
+
+  return (
+    <span className={className ?? styles.accessLine}>
+      {display}
+      <span className={done ? styles.accessCursorIdle : styles.accessCursor} aria-hidden="true">
+        |
+      </span>
+    </span>
+  );
+}
+
+// Alternates between the two wing bitmaps on an interval — a cheap,
+// dependency-free "sprite sheet" flap, same idea as Nia's blink cycle.
+function FlappingBird() {
+  const [up, setUp] = useState(true);
+
+  useEffect(() => {
+    const id = setInterval(() => setUp((v) => !v), 170);
+    return () => clearInterval(id);
+  }, []);
+
+  return <DotIcon bitmap={up ? BIRD_UP : BIRD_DOWN} label="A bird in flight" dot={7} gap={1.5} />;
+}
+
 export default function BootIntro() {
   const reduced = useReducedMotion();
   const [visible, setVisible] = useState(false);
-  const [phase, setPhase] = useState<"connect" | "hud">("connect");
+  const [phase, setPhase] = useState<"connect" | "hud" | "welcome">("connect");
   const [sweeping, setSweeping] = useState(false);
 
   useEffect(() => {
@@ -97,6 +188,9 @@ export default function BootIntro() {
       setPhase("hud");
       playSystemReady();
     }, PHASE1_MS);
+    const toWelcome = setTimeout(() => {
+      setPhase("welcome");
+    }, PHASE1_MS + WELCOME_TO_HIDE_MS);
     let sweepOff: ReturnType<typeof setTimeout>;
     const hide = setTimeout(() => {
       setVisible(false);
@@ -109,6 +203,7 @@ export default function BootIntro() {
     }, BOOT_VISIBLE_MS);
     return () => {
       clearTimeout(toHud);
+      clearTimeout(toWelcome);
       clearTimeout(hide);
       clearTimeout(sweepOff);
     };
@@ -155,7 +250,11 @@ export default function BootIntro() {
                 transition={{ duration: 0.15 }}
               >
                 <span className={styles.titleText}>
-                  {phase === "connect" ? "establishing connection" : "systems online"}
+                  {phase === "connect"
+                    ? "establishing connection"
+                    : phase === "hud"
+                      ? "systems online"
+                      : "welcome"}
                 </span>
                 <DotIcon bitmap={CORNER_ICON} label="" dot={3} gap={2} />
               </motion.div>
@@ -205,7 +304,7 @@ export default function BootIntro() {
                       />
                     </div>
                   </motion.div>
-                ) : (
+                ) : phase === "hud" ? (
                   <motion.div
                     key="hud"
                     initial={{ opacity: 0 }}
@@ -215,10 +314,37 @@ export default function BootIntro() {
                   >
                     <BootHud />
                   </motion.div>
+                ) : (
+                  <motion.div
+                    key="welcome"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <div className={styles.welcomeScene}>
+                      <FlappingBird />
+                    </div>
+                  </motion.div>
                 )}
               </AnimatePresence>
             </DottedFrame>
           </div>
+          {phase === "welcome" && (
+            <motion.div
+              className={styles.welcomeBig}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              aria-hidden="true"
+            >
+              <DecryptLine
+                text={WELCOME_TEXT}
+                startDelayMs={WELCOME_START_MS}
+                className={styles.welcomeBigText}
+              />
+            </motion.div>
+          )}
         </motion.div>
         )}
       </AnimatePresence>

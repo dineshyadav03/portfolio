@@ -5,8 +5,8 @@ import styles from "./SectionDivider.module.css";
 // "CODE: x.xx" kicker, just used mid-page instead of at the top.
 export default function SectionDivider({ label }: { label: string }) {
   return (
-    <div className={styles.divider} role="separator" aria-label={label}>
-      <span className={styles.label}>{label}</span>
+    <div className={styles.divider}>
+      <h2 className={styles.label}>{label}</h2>
       <span className={styles.rule} aria-hidden="true" />
     </div>
   );

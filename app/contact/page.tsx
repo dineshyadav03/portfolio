@@ -4,12 +4,13 @@ import ContactInfo from "@/components/ContactInfo";
 import { profile } from "@/lib/content";
 
 export const metadata: Metadata = {
-  title: `Contact — ${profile.name}`,
+  title: "Contact",
 };
 
 export default function ContactPage() {
   return (
     <SectionPage command="cat contact.txt">
+      <h1 className="srOnly">Contact — {profile.name}</h1>
       <ContactInfo />
     </SectionPage>
   );

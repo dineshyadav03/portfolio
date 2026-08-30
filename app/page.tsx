@@ -22,6 +22,12 @@ const WORDMARK = textToDotBitmap(profile.name);
 export default function Home() {
   return (
     <PageGlitch>
+      {/* The visible wordmark is a decorative dot-matrix rendering, not
+          real text — this carries the actual page title for screen
+          readers and search engines. */}
+      <h1 className="srOnly">
+        {profile.name} — {profile.role}
+      </h1>
       <motion.div
         className={styles.wordmark}
         initial={{ opacity: 0 }}

@@ -19,9 +19,40 @@ const mono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const titleString = `${profile.name} — ${profile.role}`;
+
 export const metadata: Metadata = {
-  title: `${profile.name} — ${profile.role}`,
+  title: {
+    default: titleString,
+    template: `%s — ${profile.name}`,
+  },
   description: profile.tagline,
+  keywords: ["AI Engineer", "Forward Deployed Engineer", "AI Engineering", "RAG", profile.name],
+  authors: [{ name: profile.name, url: profile.social.github }],
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: titleString,
+    description: profile.tagline,
+    siteName: `${profile.name} — Portfolio`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: titleString,
+    description: profile.tagline,
+  },
+};
+
+// Only real, defensible fields — no fabricated URL (not deployed yet, so
+// no metadataBase/canonical/WebSite schema either; those need a real
+// domain and should be added once this site actually has one).
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  jobTitle: profile.role,
+  url: profile.social.github,
+  sameAs: [profile.social.github, profile.social.linkedin, profile.social.twitter].filter(Boolean),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -34,6 +65,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           id="theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
+        {/* Server-rendered, non-executable data — a plain <script> tag here
+            (this is a Server Component) is standard practice for JSON-LD. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
         <a href="#main" className="skipLink">
           Skip to content

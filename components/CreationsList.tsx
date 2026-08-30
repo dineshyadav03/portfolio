@@ -24,13 +24,9 @@ function ProjectList({ projects }: { projects: Project[] }) {
           transition={{ duration: 0.15 }}
         >
           <div className={styles.itemHead}>
-            {project.href ? (
-              <a href={project.href} className={styles.itemName}>
-                {project.name}
-              </a>
-            ) : (
-              <span className={styles.itemName}>{project.name}</span>
-            )}
+            <h3 className={styles.itemName}>
+              {project.href ? <a href={project.href}>{project.name}</a> : project.name}
+            </h3>
             {project.status && (
               <span
                 className={

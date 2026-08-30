@@ -4,7 +4,9 @@ import { motion } from "framer-motion";
 import AsciiPortrait from "@/components/AsciiPortrait";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import BuildStatusPanel from "@/components/BuildStatusPanel";
+import Capabilities from "@/components/Capabilities";
 import DotIcon from "@/components/DotIcon";
+import HowIWork from "@/components/HowIWork";
 import PageGlitch from "@/components/PageGlitch";
 import ParallaxItem from "@/components/ParallaxItem";
 import Prompt from "@/components/Prompt";
@@ -50,6 +52,9 @@ export default function Home() {
             {profile.tagline}
             <span className={styles.cursor} aria-hidden="true" />
           </motion.p>
+          <motion.p className={styles.tags} variants={listItem}>
+            {profile.capabilityTags.join(" · ")}
+          </motion.p>
           {profile.bio.map((line) => (
             <motion.p key={line} className={styles.bioLine} variants={listItem}>
               {line}
@@ -58,7 +63,19 @@ export default function Home() {
         </motion.div>
       </div>
 
-      <SectionDivider label="0.01b — status" />
+      <SectionDivider label="0.01b — capabilities" />
+      <motion.div initial="hidden" whileInView="show" viewport={revealOnce} variants={fadeUp}>
+        <Prompt command="cat capabilities.txt" />
+        <Capabilities />
+      </motion.div>
+
+      <SectionDivider label="0.01c — how i work" />
+      <motion.div initial="hidden" whileInView="show" viewport={revealOnce} variants={fadeUp}>
+        <Prompt command="cat process.txt" />
+        <HowIWork />
+      </motion.div>
+
+      <SectionDivider label="0.01d — status" />
       <motion.div
         initial="hidden"
         whileInView="show"
@@ -74,7 +91,7 @@ export default function Home() {
         </motion.div>
       </motion.div>
 
-      <SectionDivider label="0.01c — build" />
+      <SectionDivider label="0.01e — build" />
       <motion.div initial="hidden" whileInView="show" viewport={revealOnce} variants={fadeUp}>
         <BuildStatusPanel />
       </motion.div>

@@ -5,7 +5,8 @@ export const profile = {
   name: "Dinesh Yadav",
   handle: "dineshyadav",
   role: "AI Engineer & Forward Deployed Engineer",
-  tagline: "AI engineer & forward deployed engineer — building where models meet real deployments.",
+  tagline: "I build, deploy, and improve AI systems for real-world workflows.",
+  capabilityTags: ["LLMs", "RAG", "Agents", "Automation", "AI Infrastructure"],
   bio: [
     "Building scalable AI products, open-source tools, and real-world systems — across LLMs, agents, computer vision, and robotics.",
     "Actively shipping fixes into major open-source codebases — landed merges in Zed and PipesHub, with open PRs under review in Ollama, Home Assistant, Ruff, and Griptape — root-causing real bugs across Rust, Go, TypeScript, and Python.",
@@ -26,8 +27,8 @@ export const profile = {
 
 export const nav = [
   { label: "about", href: "/", code: "0.01" },
-  { label: "creations", href: "/creations", code: "0.02" },
-  { label: "reflections", href: "/reflections", code: "0.03" },
+  { label: "work", href: "/creations", code: "0.02" },
+  { label: "writing", href: "/reflections", code: "0.03" },
   { label: "contact", href: "/contact", code: "0.04" },
 ] as const;
 
@@ -53,6 +54,47 @@ export const status = [
   { label: "contact", value: profile.email },
 ] as const;
 
+// Grouped around what a forward deployed engineer actually does, not a
+// generic skill cloud — every item here is backed by a real project or
+// merged PR listed on the creations page.
+export const capabilities = [
+  {
+    category: "AI engineering",
+    items: ["LLM applications", "RAG", "hybrid retrieval", "citation-enforced generation", "embeddings"],
+  },
+  {
+    category: "Software engineering",
+    items: ["Python", "TypeScript", "Node.js", "Rust", "Go", "Git"],
+  },
+  {
+    category: "AI infrastructure",
+    items: ["model APIs", "vector embeddings", "Docker", "Hugging Face Spaces deployment"],
+  },
+  {
+    category: "Forward deployment",
+    items: [
+      "root-causing bugs in unfamiliar production codebases",
+      "shipping fixes upstream into real projects",
+      "scoping ambiguous problems into working systems",
+    ],
+  },
+  {
+    category: "Domain",
+    items: ["AEC", "computer vision", "robotics"],
+  },
+] as const;
+
+// A statement of approach, not a claim about any specific past engagement —
+// how work gets scoped and shipped, end to end.
+export const howIWork = [
+  { step: "discover", detail: "Understand the user, workflow, and constraints." },
+  { step: "prototype", detail: "Build the smallest useful version quickly." },
+  { step: "integrate", detail: "Connect models to real data and existing systems." },
+  { step: "deploy", detail: "Put the system into the user's environment." },
+  { step: "evaluate", detail: "Measure quality, performance, and impact." },
+  { step: "iterate", detail: "Use real-world feedback to improve the system." },
+] as const;
+
 export const announcement = {
   // Flip to true once there's a real announcement — a visible "TODO" banner
   // on a live site reads as unfinished rather than in-progress.
@@ -61,11 +103,11 @@ export const announcement = {
 };
 
 export const buildStatus = {
-  // about / creations / contact have real content; reflections is still an
-  // honest empty state and the resume link isn't hooked up yet — bump this
-  // as those fill in.
+  // about / work / contact have real content; writing is still an honest
+  // empty state and the resume link isn't hooked up yet — bump this as
+  // those fill in.
   percent: 75,
-  detail: "3 of 4 sections finalized — reflections pending",
+  detail: "3 of 4 sections finalized — writing pending",
 };
 
 export type Project = {
@@ -94,7 +136,7 @@ export const projects: Project[] = [
   {
     name: "taxcite",
     description:
-      "RAG assistant over India's Income-tax Act, 2025 — citation-enforced answers, hybrid retrieval with table-aware extraction, deployment packaged for Hugging Face Spaces.",
+      "RAG assistant over India's Income-tax Act, 2025. Answers are citation-enforced — a tax answer without a verifiable section reference isn't usable — so every response is grounded to source text rather than generated freely. Retrieval is hybrid (dense + keyword), because statutory section numbers and exact terminology need precise matching that pure semantic search misses, with table-aware extraction for the Act's rate schedules. Packaged for Hugging Face Spaces deployment.",
     href: "https://github.com/dineshyadav03/taxcite",
     stack: ["Python", "RAG", "Voyage AI embeddings", "Docker"],
   },

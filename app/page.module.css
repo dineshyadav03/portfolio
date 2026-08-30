@@ -47,6 +47,14 @@
   }
 }
 
+.tags {
+  margin: 0 0 16px;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--term-mint);
+}
+
 .bioLine {
   margin: 0 0 10px;
   color: var(--term-fg-dim);

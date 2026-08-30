@@ -26,9 +26,9 @@ const HELP_LINES = [
   "  help              show this list",
   "  whoami            about " + profile.name,
   "  ls                list sections",
-  "  cd <section>      navigate (about, creations, reflections, contact)",
-  "  cat projects      list creations",
-  "  cat posts         list reflections",
+  "  cd <section>      navigate (about, work, writing, contact)",
+  "  cat projects      list work",
+  "  cat posts         list writing",
   "  contact           show contact info",
   "  clear             clear this terminal",
 ];

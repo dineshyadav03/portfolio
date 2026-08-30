@@ -54,7 +54,9 @@ export const status = [
 ] as const;
 
 export const announcement = {
-  live: true,
+  // Flip to true once there's a real announcement — a visible "TODO" banner
+  // on a live site reads as unfinished rather than in-progress.
+  live: false,
   text: "TODO — put a live announcement here, e.g. \"latest project shipped\"",
 };
 
@@ -119,11 +121,6 @@ export type Post = {
   href?: string;
 };
 
-export const posts: Post[] = [
-  {
-    title: "TODO: First reflection",
-    date: "2026-08-28",
-    summary: "A short summary of what this piece is about.",
-    href: "",
-  },
-];
+// No reflections published yet — ReflectionsList renders an honest empty
+// state rather than a fake placeholder post.
+export const posts: Post[] = [];

@@ -2,9 +2,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 22px;
-  margin-top: 28px;
-  padding-top: 18px;
-  border-top: 1px solid var(--term-border);
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--term-border);
 }
 
 .item {

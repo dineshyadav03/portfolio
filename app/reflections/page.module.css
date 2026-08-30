@@ -49,3 +49,9 @@ a.itemTitle:hover {
   line-height: 1.6;
   max-width: 60ch;
 }
+
+.empty {
+  margin: 0;
+  color: var(--term-muted);
+  font-size: 0.85rem;
+}

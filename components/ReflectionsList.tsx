@@ -6,6 +6,10 @@ import { listContainer, listItem, revealOnce } from "@/lib/motion";
 import styles from "@/app/reflections/page.module.css";
 
 export default function ReflectionsList({ posts }: { posts: Post[] }) {
+  if (posts.length === 0) {
+    return <p className={styles.empty}>Nothing published yet — check back soon.</p>;
+  }
+
   return (
     <motion.ul
       className={styles.list}

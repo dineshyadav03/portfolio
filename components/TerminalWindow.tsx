@@ -34,8 +34,8 @@ export default function TerminalWindow({ children }: { children: React.ReactNode
             CODE: {section.code} — {section.label}
           </p>
         )}
-        {children}
         <Nav />
+        {children}
         <CommandLine />
       </div>
     </motion.div>

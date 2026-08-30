@@ -82,6 +82,7 @@ export default function BootIntro() {
   const reduced = useReducedMotion();
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState<"connect" | "hud">("connect");
+  const [sweeping, setSweeping] = useState(false);
 
   useEffect(() => {
     if (reduced) return;
@@ -96,16 +97,39 @@ export default function BootIntro() {
       setPhase("hud");
       playSystemReady();
     }, PHASE1_MS);
-    const hide = setTimeout(() => setVisible(false), BOOT_VISIBLE_MS);
+    let sweepOff: ReturnType<typeof setTimeout>;
+    const hide = setTimeout(() => {
+      setVisible(false);
+      // A full-width scanline sweeps down over the real page right as it's
+      // revealed — a deliberate "signal coming through" beat instead of the
+      // site just appearing once the overlay fades, since a flat cross-fade
+      // alone reads as static.
+      setSweeping(true);
+      sweepOff = setTimeout(() => setSweeping(false), 650);
+    }, BOOT_VISIBLE_MS);
     return () => {
       clearTimeout(toHud);
       clearTimeout(hide);
+      clearTimeout(sweepOff);
     };
   }, [reduced]);
 
   return (
-    <AnimatePresence>
-      {visible && (
+    <>
+      <AnimatePresence>
+        {sweeping && (
+          <motion.div
+            className={styles.revealSweep}
+            initial={{ top: "0%", opacity: 1 }}
+            animate={{ top: "100%", opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {visible && (
         <motion.div
           className={styles.overlay}
           initial={{ opacity: 0 }}
@@ -196,7 +220,8 @@ export default function BootIntro() {
             </DottedFrame>
           </div>
         </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

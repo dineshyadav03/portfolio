@@ -68,6 +68,20 @@
   pointer-events: none;
 }
 
+/* Sweeps down over the real, now-revealed page right as the boot overlay
+   clears — a deliberate "signal landing" beat so the handoff reads as a
+   transition rather than the site just quietly appearing. */
+.revealSweep {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 199;
+  background: var(--term-accent);
+  box-shadow: 0 0 24px 4px var(--term-accent-glow), 0 0 60px 12px var(--term-accent-glow);
+  pointer-events: none;
+}
+
 .accessRow {
   padding: 0 24px 20px;
 }

@@ -17,3 +17,8 @@ export const fadeUp: Variants = {
   hidden: { opacity: 0, y: 8 },
   show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
 };
+
+// Shared `viewport` prop for scroll-triggered (`whileInView`) reveals —
+// fires once, a little before the element is fully on screen so it
+// finishes settling right as it comes into view rather than after.
+export const revealOnce = { once: true, margin: "-80px 0px -80px 0px" };

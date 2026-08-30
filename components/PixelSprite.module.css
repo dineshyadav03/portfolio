@@ -7,9 +7,43 @@
 }
 
 .body {
+  border-radius: 50%;
   background: #f2c14e;
+  box-shadow: 0 0 3px 0 rgba(242, 193, 78, 0.55);
+  animation: twinkle 3.2s ease-in-out infinite;
 }
 
 .eye {
+  border-radius: 50%;
   background: #160800;
+}
+
+/* A light, staggered shimmer across the body dots — a nod to the
+   particle-field look without turning the whole sprite into a distracting
+   flicker. Six offsets cycling by grid position keep it from reading as a
+   single uniform pulse. */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.body:nth-child(6n) {
+  animation-delay: -0.4s;
+}
+.body:nth-child(6n + 1) {
+  animation-delay: -1.1s;
+}
+.body:nth-child(6n + 2) {
+  animation-delay: -1.8s;
+}
+.body:nth-child(6n + 3) {
+  animation-delay: -2.3s;
+}
+.body:nth-child(6n + 4) {
+  animation-delay: -2.9s;
 }

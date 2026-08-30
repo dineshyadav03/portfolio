@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import SoundToggle from "./SoundToggle";
 import ThemeToggle from "./ThemeToggle";
+import { useBootRevealDelay } from "@/lib/bootTiming";
 import styles from "./StatusBar.module.css";
 
 const IST_FORMATTER = new Intl.DateTimeFormat("en-IN", {
@@ -23,6 +25,7 @@ const UTC_FORMATTER = new Intl.DateTimeFormat("en-GB", {
 
 export default function StatusBar() {
   const [now, setNow] = useState<Date | null>(null);
+  const delaySec = useBootRevealDelay();
 
   useEffect(() => {
     // Clock must render null on the server and pick up the real time only
@@ -34,7 +37,12 @@ export default function StatusBar() {
   }, []);
 
   return (
-    <div className={styles.bar}>
+    <motion.div
+      className={styles.bar}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: delaySec, ease: [0.16, 1, 0.3, 1] }}
+    >
       <div className={styles.hints}>
         <span>
           <kbd>1</kbd>-<kbd>4</kbd> or <kbd>↑</kbd>
@@ -62,6 +70,6 @@ export default function StatusBar() {
           <span>&nbsp;</span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

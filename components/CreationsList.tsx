@@ -2,12 +2,19 @@
 
 import { motion } from "framer-motion";
 import type { Project } from "@/lib/content";
-import { listContainer, listItem } from "@/lib/motion";
+import { listContainer, listItem, revealOnce } from "@/lib/motion";
+import SectionDivider from "./SectionDivider";
 import styles from "@/app/creations/page.module.css";
 
-export default function CreationsList({ projects }: { projects: Project[] }) {
+function ProjectList({ projects }: { projects: Project[] }) {
   return (
-    <motion.ul className={styles.list} initial="hidden" animate="show" variants={listContainer}>
+    <motion.ul
+      className={styles.list}
+      initial="hidden"
+      whileInView="show"
+      viewport={revealOnce}
+      variants={listContainer}
+    >
       {projects.map((project) => (
         <motion.li
           key={project.name}
@@ -43,5 +50,22 @@ export default function CreationsList({ projects }: { projects: Project[] }) {
         </motion.li>
       ))}
     </motion.ul>
+  );
+}
+
+export default function CreationsList({ projects }: { projects: Project[] }) {
+  const ownBuilds = projects.filter((p) => !p.status);
+  const contributions = projects.filter((p) => p.status);
+
+  return (
+    <>
+      <ProjectList projects={ownBuilds} />
+      {contributions.length > 0 && (
+        <>
+          <SectionDivider label="0.02b — open-source contributions" />
+          <ProjectList projects={contributions} />
+        </>
+      )}
+    </>
   );
 }

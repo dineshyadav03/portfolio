@@ -6,11 +6,13 @@ import AnnouncementBanner from "@/components/AnnouncementBanner";
 import BuildStatusPanel from "@/components/BuildStatusPanel";
 import DotIcon from "@/components/DotIcon";
 import PageGlitch from "@/components/PageGlitch";
+import ParallaxItem from "@/components/ParallaxItem";
 import Prompt from "@/components/Prompt";
+import SectionDivider from "@/components/SectionDivider";
 import StatusReadout from "@/components/StatusReadout";
 import { profile } from "@/lib/content";
 import { textToDotBitmap } from "@/lib/dotFont";
-import { fadeUp, listContainer, listItem } from "@/lib/motion";
+import { fadeUp, listContainer, listItem, revealOnce } from "@/lib/motion";
 import styles from "./page.module.css";
 
 const WORDMARK = textToDotBitmap(profile.name);
@@ -34,7 +36,9 @@ export default function Home() {
           animate="show"
           variants={fadeUp}
         >
-          <AsciiPortrait />
+          <ParallaxItem strength={18}>
+            <AsciiPortrait />
+          </ParallaxItem>
         </motion.div>
         <motion.div
           className={styles.intro}
@@ -53,11 +57,24 @@ export default function Home() {
           ))}
         </motion.div>
       </div>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+
+      <SectionDivider label="0.01b — status" />
+      <motion.div
+        initial="hidden"
+        whileInView="show"
+        viewport={revealOnce}
+        variants={listContainer}
+      >
         <Prompt command="cat status.txt" />
-        <StatusReadout />
-        <AnnouncementBanner />
-        <BuildStatusPanel />
+        <motion.div variants={listItem}>
+          <StatusReadout />
+        </motion.div>
+        <motion.div variants={listItem}>
+          <AnnouncementBanner />
+        </motion.div>
+        <motion.div variants={listItem}>
+          <BuildStatusPanel />
+        </motion.div>
       </motion.div>
     </PageGlitch>
   );

@@ -2,12 +2,18 @@
 
 import { motion } from "framer-motion";
 import type { Post } from "@/lib/content";
-import { listContainer, listItem } from "@/lib/motion";
+import { listContainer, listItem, revealOnce } from "@/lib/motion";
 import styles from "@/app/reflections/page.module.css";
 
 export default function ReflectionsList({ posts }: { posts: Post[] }) {
   return (
-    <motion.ul className={styles.list} initial="hidden" animate="show" variants={listContainer}>
+    <motion.ul
+      className={styles.list}
+      initial="hidden"
+      whileInView="show"
+      viewport={revealOnce}
+      variants={listContainer}
+    >
       {posts.map((post) => (
         <motion.li
           key={post.title}

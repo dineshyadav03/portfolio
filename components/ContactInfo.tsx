@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { profile } from "@/lib/content";
-import { listContainer, listItem } from "@/lib/motion";
+import { listContainer, listItem, revealOnce } from "@/lib/motion";
 import styles from "@/app/contact/page.module.css";
 
 const socialLabels: Record<keyof typeof profile.social, string> = {
@@ -19,7 +19,13 @@ export default function ContactInfo() {
 
   return (
     <>
-      <motion.dl className={styles.list} initial="hidden" animate="show" variants={listContainer}>
+      <motion.dl
+        className={styles.list}
+        initial="hidden"
+        whileInView="show"
+        viewport={revealOnce}
+        variants={listContainer}
+      >
         <motion.div className={styles.row} variants={listItem}>
           <dt>email</dt>
           <dd>

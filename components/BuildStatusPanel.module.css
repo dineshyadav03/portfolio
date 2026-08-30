@@ -111,6 +111,20 @@
   border-color: var(--term-accent);
 }
 
+.action:focus-visible {
+  outline: 1px solid var(--term-accent);
+  outline-offset: 2px;
+}
+
+.actionPrimary {
+  color: var(--term-accent);
+  border-color: var(--term-accent);
+}
+
+.actionPrimary:hover {
+  box-shadow: 0 0 8px 0 var(--term-accent-glow);
+}
+
 .actionDisabled {
   color: var(--term-border);
   cursor: not-allowed;

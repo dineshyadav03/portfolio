@@ -41,25 +41,29 @@
   animation: glitchCyan 7s infinite;
 }
 
+/* Windowed to land inside the same 95-96.8% slice of the shared 7s loop as
+   PageGlitch's whole-page burst (below), so the portrait's own RGB split
+   reads as part of one coordinated system-glitch moment instead of a
+   second, separately-timed flicker ~300ms apart. */
 @keyframes glitchRed {
   0%,
-  91%,
+  95%,
   100% {
     opacity: 0;
     transform: translate(0, 0);
     clip-path: inset(0 0 0 0);
   }
-  92% {
+  95.6% {
     opacity: 0.7;
     transform: translate(-2px, 1px);
     clip-path: inset(15% 0 55% 0);
   }
-  93% {
+  96.2% {
     opacity: 0.6;
     transform: translate(1px, -1px);
     clip-path: inset(60% 0 5% 0);
   }
-  94% {
+  96.8% {
     opacity: 0;
     transform: translate(0, 0);
     clip-path: inset(0 0 0 0);
@@ -68,23 +72,23 @@
 
 @keyframes glitchCyan {
   0%,
-  91.5%,
+  95.2%,
   100% {
     opacity: 0;
     transform: translate(0, 0);
     clip-path: inset(0 0 0 0);
   }
-  92.5% {
+  95.8% {
     opacity: 0.6;
     transform: translate(2px, 0);
     clip-path: inset(35% 0 30% 0);
   }
-  93.5% {
+  96.4% {
     opacity: 0.5;
     transform: translate(-1px, 1px);
     clip-path: inset(5% 0 70% 0);
   }
-  94.5% {
+  96.9% {
     opacity: 0;
     transform: translate(0, 0);
     clip-path: inset(0 0 0 0);

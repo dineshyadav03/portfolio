@@ -49,7 +49,18 @@ export default function BuildStatusPanel() {
         <div className={styles.actions}>
           {ACTIONS.map((action) =>
             action.href ? (
-              <a key={action.label} href={action.href} className={styles.action}>
+              <a
+                key={action.label}
+                href={action.href}
+                className={
+                  // "contact" is the one action that's a real, working next
+                  // step right now — a subtle accent default (not just on
+                  // hover) signals it as primary, source/resume as neutral.
+                  action.label === "contact"
+                    ? `${styles.action} ${styles.actionPrimary}`
+                    : styles.action
+                }
+              >
                 {action.label}
               </a>
             ) : (

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import PixelSprite from "./PixelSprite";
 import { mascotBitmap } from "@/lib/mascotBitmap";
+import { useBootRevealDelay } from "@/lib/bootTiming";
 import { playGreetChirp } from "@/lib/sound";
 import styles from "./Mascot.module.css";
 
@@ -26,14 +27,27 @@ const WANDER_MAX = 30;
 
 export default function Mascot() {
   const reduced = useReducedMotion();
+  const bootDelaySec = useBootRevealDelay();
+  const [ready, setReady] = useState(false);
   const [right, setRight] = useState(WANDER_MIN);
   const [facing, setFacing] = useState(1);
   const [eyesOpen, setEyesOpen] = useState(true);
   const [greeting, setGreeting] = useState<string | null>(null);
   const [waving, setWaving] = useState(false);
 
+  // She's mounted (and behind the boot overlay) for the whole boot sequence,
+  // but her wander/blink/ambient-greet timers shouldn't start counting down
+  // until the overlay actually clears — otherwise her first ambient greeting
+  // can land within milliseconds of the reveal-sweep, competing with it for
+  // attention right when the visitor should be looking at the page itself.
   useEffect(() => {
     if (reduced) return;
+    const id = setTimeout(() => setReady(true), bootDelaySec * 1000);
+    return () => clearTimeout(id);
+  }, [reduced, bootDelaySec]);
+
+  useEffect(() => {
+    if (reduced || !ready) return;
     const id = setInterval(() => {
       setRight((prev) => {
         const next = Math.max(WANDER_MIN, Math.min(WANDER_MAX, prev + (Math.random() * 20 - 10)));
@@ -45,17 +59,17 @@ export default function Mascot() {
       });
     }, 4500);
     return () => clearInterval(id);
-  }, [reduced]);
+  }, [reduced, ready]);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || !ready) return;
     const id = setInterval(() => {
       setEyesOpen(false);
       const wake = setTimeout(() => setEyesOpen(true), 140);
       return () => clearTimeout(wake);
     }, 3600);
     return () => clearInterval(id);
-  }, [reduced]);
+  }, [reduced, ready]);
 
   function showBubble(withSound: boolean) {
     if (withSound) playGreetChirp();
@@ -70,10 +84,10 @@ export default function Mascot() {
   // She speaks up on her own every so often, not just when clicked — a
   // sign of life rather than a one-shot easter egg.
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || !ready) return;
     const id = setInterval(() => showBubble(false), AMBIENT_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [reduced]);
+  }, [reduced, ready]);
 
   function handleActivate() {
     showBubble(true);

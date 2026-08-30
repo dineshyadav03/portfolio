@@ -43,16 +43,20 @@ export default function Home() {
           initial="hidden"
           animate="show"
           variants={fadeUp}
+          transition={{ duration: 0.3, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
         >
           <ParallaxItem strength={18}>
             <AsciiPortrait />
           </ParallaxItem>
         </motion.div>
+        {/* Delayed to arrive just after the "whoami" prompt above finishes
+            typing, so the hero reads as its answer rather than racing it. */}
         <motion.div
           className={styles.intro}
           initial="hidden"
           animate="show"
           variants={listContainer}
+          transition={{ staggerChildren: 0.07, delayChildren: 0.38 }}
         >
           <motion.p className={styles.role} variants={listItem}>
             {profile.tagline}

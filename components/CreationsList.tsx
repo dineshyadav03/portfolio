@@ -6,7 +6,7 @@ import { listContainer, listItem, revealOnce } from "@/lib/motion";
 import SectionDivider from "./SectionDivider";
 import styles from "@/app/creations/page.module.css";
 
-function ProjectList({ projects }: { projects: Project[] }) {
+function ProjectList({ projects, groupCode }: { projects: Project[]; groupCode: string }) {
   return (
     <motion.ul
       className={styles.list}
@@ -15,7 +15,7 @@ function ProjectList({ projects }: { projects: Project[] }) {
       viewport={revealOnce}
       variants={listContainer}
     >
-      {projects.map((project) => (
+      {projects.map((project, i) => (
         <motion.li
           key={project.name}
           className={styles.item}
@@ -24,6 +24,9 @@ function ProjectList({ projects }: { projects: Project[] }) {
           transition={{ duration: 0.15 }}
         >
           <div className={styles.itemHead}>
+            <span className={styles.index} aria-hidden="true">
+              {groupCode}.{String(i + 1).padStart(2, "0")}
+            </span>
             <h3 className={styles.itemName}>
               {project.href ? <a href={project.href}>{project.name}</a> : project.name}
             </h3>
@@ -55,11 +58,11 @@ export default function CreationsList({ projects }: { projects: Project[] }) {
 
   return (
     <>
-      <ProjectList projects={ownBuilds} />
+      <ProjectList projects={ownBuilds} groupCode="0.02" />
       {contributions.length > 0 && (
         <>
           <SectionDivider label="0.02b — open-source contributions" />
-          <ProjectList projects={contributions} />
+          <ProjectList projects={contributions} groupCode="0.02b" />
         </>
       )}
     </>

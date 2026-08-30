@@ -31,6 +31,13 @@
   border-bottom-color: var(--term-border);
 }
 
+.link:focus-visible,
+.active:focus-visible {
+  outline: 1px solid var(--term-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 .active {
   color: var(--term-accent);
 }

@@ -72,9 +72,11 @@ export default function Home() {
         <motion.div variants={listItem}>
           <AnnouncementBanner />
         </motion.div>
-        <motion.div variants={listItem}>
-          <BuildStatusPanel />
-        </motion.div>
+      </motion.div>
+
+      <SectionDivider label="0.01c — build" />
+      <motion.div initial="hidden" whileInView="show" viewport={revealOnce} variants={fadeUp}>
+        <BuildStatusPanel />
       </motion.div>
     </PageGlitch>
   );

@@ -19,6 +19,8 @@ export const fadeUp: Variants = {
 };
 
 // Shared `viewport` prop for scroll-triggered (`whileInView`) reveals —
-// fires once, a little before the element is fully on screen so it
-// finishes settling right as it comes into view rather than after.
-export const revealOnce = { once: true, margin: "-80px 0px -80px 0px" };
+// fires once, as soon as a small slice of the element is visible. Uses
+// `amount` (a plain 0-1 fraction) rather than `margin`, whose negative-value
+// sign convention is easy to get backwards and, combined with `once`, can
+// end up resolving true before the element is ever actually in view.
+export const revealOnce = { once: true, amount: 0.1 };

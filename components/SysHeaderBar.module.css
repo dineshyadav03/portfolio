@@ -1,20 +1,9 @@
 .bar {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 10px;
   flex-wrap: wrap;
-}
-
-.col {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.right {
-  align-items: flex-end;
-  text-align: right;
+  gap: 8px 24px;
+  margin-bottom: 10px;
 }
 
 .row {
@@ -26,27 +15,12 @@
 }
 
 .label {
-  display: inline-block;
-  width: 82px;
   text-transform: uppercase;
-}
-
-.right .row {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.right .label {
-  width: auto;
 }
 
 .sep {
   color: var(--term-border);
-  margin-right: 8px;
-}
-
-.right .sep {
-  margin-left: 8px;
+  margin: 0 8px;
 }
 
 .online {
@@ -58,20 +32,7 @@
 }
 
 @media (max-width: 480px) {
-  .right {
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .right .row {
-    justify-content: flex-start;
-  }
-
-  .right .label {
-    width: 60px;
-  }
-
-  .right .sep {
-    margin-left: 0;
+  .row {
+    white-space: normal;
   }
 }

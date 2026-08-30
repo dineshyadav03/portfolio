@@ -10,7 +10,6 @@ import KeyboardNav from "@/components/KeyboardNav";
 import TerminalWindow from "@/components/TerminalWindow";
 import PageTransition from "@/components/PageTransition";
 import BootIntro from "@/components/BootIntro";
-import CityClockBar from "@/components/CityClockBar";
 import Mascot from "@/components/Mascot";
 import ScrollHint from "@/components/ScrollHint";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -47,7 +46,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <ScrollHint />
           <div className={styles.stage}>
             <main id="main" className={styles.mainCol}>
-              <CityClockBar />
               <TerminalWindow>
                 <PageTransition>{children}</PageTransition>
               </TerminalWindow>

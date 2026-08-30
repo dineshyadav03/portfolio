@@ -97,6 +97,7 @@ export default function Mascot() {
         }
       }}
     >
+      <span className={styles.ring} data-active={waving} aria-hidden="true" />
       {greeting && <div className={styles.bubble}>{greeting}</div>}
       <div className={styles.sprite} style={{ transform: `scaleX(${facing})` }}>
         <div className={styles.wiggle}>

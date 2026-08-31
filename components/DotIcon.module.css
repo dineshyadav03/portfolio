@@ -4,7 +4,11 @@
 
 .dotOn {
   border-radius: 50%;
-  background: var(--term-fg);
+  /* Callers can override the mark's color by setting --dot-color on an
+     ancestor (e.g. a project tile's signature glyph); the wordmark and
+     every other existing use site is untouched since the fallback is
+     exactly the color they already rendered. */
+  background: var(--dot-color, var(--term-fg));
 }
 
 .dotOff {

@@ -12,6 +12,7 @@ import PageTransition from "@/components/PageTransition";
 import BootIntro from "@/components/BootIntro";
 import Mascot from "@/components/Mascot";
 import ScrollHint from "@/components/ScrollHint";
+import SmoothScroll from "@/components/SmoothScroll";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const mono = Geist_Mono({
@@ -77,6 +78,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <div className="grain" aria-hidden="true" />
         <KeyboardNav />
+        <SmoothScroll />
         <MotionConfig reducedMotion="user">
           <BootIntro />
           <Mascot />

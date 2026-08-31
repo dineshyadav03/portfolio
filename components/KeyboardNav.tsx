@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { nav } from "@/lib/content";
+import { playNavClick } from "@/lib/sound";
 
 /**
  * Lets visitors jump between sections with 1-4, or step through them with
@@ -28,13 +29,27 @@ export default function KeyboardNav() {
         const base = current === -1 ? 0 : current;
         const step = e.key === "ArrowDown" ? 1 : -1;
         const next = (base + step + nav.length) % nav.length;
+        playNavClick();
         router.push(nav[next].href);
+        return;
+      }
+
+      // A common convention (Slack, GitHub, countless command palettes) —
+      // jump straight to the terminal input without scrolling to find it.
+      // The command line already lives at the bottom of every page.
+      if (e.key === "/") {
+        e.preventDefault();
+        const input = document.querySelector<HTMLInputElement>('input[aria-label="Terminal command input"]');
+        input?.focus();
         return;
       }
 
       const index = Number(e.key) - 1;
       const item = nav[index];
-      if (item) router.push(item.href);
+      if (item) {
+        playNavClick();
+        router.push(item.href);
+      }
     }
 
     window.addEventListener("keydown", onKeyDown);

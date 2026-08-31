@@ -1,0 +1,183 @@
+.visual {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 3;
+  /* One shared, mode-agnostic entrance — the geometry "resolves into
+     place" a beat after its tile has already faded in (the tile's own
+     opacity/y transform comes from CreationsList's existing listItem
+     stagger; this is a second, smaller, purely-CSS layer on top of that,
+     not a replacement for it). No React state, no per-frame updates — a
+     single one-shot keyframe animation that starts on mount. Every mode
+     (nodes/wireframe/grid/orbit/flow) gets the identical treatment rather
+     than five bespoke behaviors. */
+  animation: resolveIn 0.5s var(--ease-standard) both;
+  animation-delay: 0.15s;
+}
+
+@keyframes resolveIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The sitewide reduced-motion rule (globals.css) collapses every
+   animation's *duration* to near-zero, but not its *delay* — left alone,
+   that would still leave this SVG invisible for the 0.15s delay above
+   before "completing" instantly. Removing the delay here too means
+   reduced-motion sessions see the resolved (opacity:1, scale:1) state
+   immediately, with no perceptible flash. */
+@media (prefers-reduced-motion: reduce) {
+  .visual {
+    animation-delay: 0s;
+  }
+}
+
+/* stroke-width/opacity transition (a discrete hover on/off) — transform
+   deliberately does NOT, since grid mode drives it continuously from the
+   same already-damped --nx/--ny CreationsList writes every frame (see the
+   grid rule below); a transition on top of an already-smoothed,
+   continuously-changing value fights itself instead of settling. */
+.stroke {
+  stroke: var(--term-border);
+  fill: none;
+  stroke-width: 1;
+  transition: stroke-width 0.2s var(--ease-standard), opacity 0.2s var(--ease-standard);
+}
+
+.strokeAccent {
+  stroke: var(--term-mint);
+  fill: none;
+  stroke-width: 1.1;
+  transition: stroke-width 0.2s var(--ease-standard), opacity 0.2s var(--ease-standard);
+}
+
+/* No transform transition here either — nodes mode drives .dot/.dotAccent
+   continuously from the same damped pointer value (below); the hover
+   scale(1.25) these also carry applies as an instant, small state flip
+   rather than fighting that continuous value with a second interpolation. */
+.dot,
+.dotAccent {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.dot {
+  fill: var(--term-fg-dim);
+}
+
+.dotAccent {
+  fill: var(--term-mint);
+}
+
+/* One shared "gains emphasis" response across every mode — driven by the
+   project tile's existing pointer handler (see CreationsList.tsx), which
+   sets data-hovering on the tile's outer wrapper rather than this
+   component owning a second listener. :global() reaches that ancestor
+   attribute (defined in a different CSS module) while .stroke/.dot etc.
+   stay locally scoped like everywhere else in this file. */
+:global([data-hovering="true"]) .stroke {
+  stroke-width: 1.4;
+}
+
+:global([data-hovering="true"]) .strokeAccent {
+  stroke-width: 1.6;
+}
+
+:global([data-hovering="true"]) .dot,
+:global([data-hovering="true"]) .dotAccent {
+  transform: scale(1.25);
+}
+
+/* --- Pass 13: pointer-reactive mode behavior ---
+   CreationsList's existing pointer handler (one listener, one rAF loop —
+   see CreationsList.tsx) writes normalized pointer coordinates as --nx/--ny
+   custom properties directly onto .visualWrap, this SVG's parent, once per
+   frame, alongside the depth transform it already applies to that wrapper.
+   Every rule below just *reads* those two properties — no second listener,
+   no per-frame React state, no per-frame JS in this file at all. The
+   `, 0` fallback means these resolve to a harmless no-op wherever the
+   properties are never set (e.g. ReflectionsList's plain, non-hoverable
+   use of this same component). Each mode reacts differently, so removing
+   the project title still leaves five visually distinct *behaviors*, not
+   just five distinct static shapes. */
+
+/* NODES — the brighter "accent" points drift more than the dim ones, a
+   cheap parallax stand-in for "nearby nodes respond, distant ones don't." */
+svg[data-mode="nodes"] .dot {
+  transform: translate(calc(var(--nx, 0) * 3px), calc(var(--ny, 0) * 3px));
+}
+svg[data-mode="nodes"] .dotAccent {
+  transform: translate(calc(var(--nx, 0) * 6px), calc(var(--ny, 0) * 6px));
+}
+:global([data-hovering="true"]) svg[data-mode="nodes"] .dot {
+  transform: translate(calc(var(--nx, 0) * 3px), calc(var(--ny, 0) * 3px)) scale(1.25);
+}
+:global([data-hovering="true"]) svg[data-mode="nodes"] .dotAccent {
+  transform: translate(calc(var(--nx, 0) * 6px), calc(var(--ny, 0) * 6px)) scale(1.25);
+}
+
+/* WIREFRAME — the pointer nudges camera orientation a few degrees, not a
+   spin. transform-origin is fixed to the viewBox center (200x120) rather
+   than relying on SVG's default view-box transform-box, which is exactly
+   that center already, but stated explicitly for clarity. */
+/* `--settle` (Pass 16): 1 by default, dialed down for a merged/settled
+   project (see the `data-settled` attribute set in ProjectVisual.tsx) —
+   the one honest "how active does this feel" distinction the real
+   `status` field supports. Only wireframe/grid ever carry `data-settled`,
+   since those are the only modes a status-bearing project can be assigned
+   (see STRUCTURAL_MODES in ProjectVisual.tsx). */
+.visual[data-settled="true"] {
+  --settle: 0.45;
+}
+
+.wireGroup {
+  transform-origin: 100px 60px;
+  transform: rotate(calc(var(--nx, 0) * var(--settle, 1) * 5deg));
+}
+
+/* Pass 20: when this is the focused tile, its geometry becomes genuinely
+   more expressive, not just brighter — the same pointer value drives a
+   wider rotation swing. More specific than the base rule above, so it
+   overrides it while hovering without needing JS to swap values. */
+:global([data-hovering="true"]) .wireGroup {
+  transform: rotate(calc(var(--nx, 0) * var(--settle, 1) * 8deg));
+}
+
+/* GRID — each row's own static --row-bias (heaviest at the middle rows,
+   set once per row at render, see ProjectVisual.tsx) combines with the
+   live --ny to make the sheet bend more in the middle than at its edges,
+   instead of every row translating by an identical amount. */
+svg[data-mode="grid"] .stroke,
+svg[data-mode="grid"] .strokeAccent {
+  transform: translateY(calc(var(--ny, 0) * var(--row-bias, 0) * var(--settle, 1) * 6px));
+}
+
+:global([data-hovering="true"]) svg[data-mode="grid"] .stroke,
+:global([data-hovering="true"]) svg[data-mode="grid"] .strokeAccent {
+  transform: translateY(calc(var(--ny, 0) * var(--row-bias, 0) * var(--settle, 1) * 10px));
+}
+
+/* ORBIT — outer rings respond more than inner ones (their own static
+   --ring-bias, set once per ring), echoing "different orbital layers
+   respond at different strengths" without changing the ring geometry. */
+svg[data-mode="orbit"] .stroke {
+  transform-origin: 100px 60px;
+  transform: rotate(calc(var(--nx, 0) * var(--ring-bias, 0) * 4deg));
+}
+
+:global([data-hovering="true"]) svg[data-mode="orbit"] .stroke {
+  transform-origin: 100px 60px;
+  transform: rotate(calc(var(--nx, 0) * var(--ring-bias, 0) * 7deg));
+}
+
+/* FLOW — the whole path+points drift together, a small local perturbation
+   of the field rather than a per-point recomputation. */
+.flowGroup {
+  transform: translate(calc(var(--nx, 0) * 3px), calc(var(--ny, 0) * 3px));
+}

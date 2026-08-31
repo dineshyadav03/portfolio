@@ -28,6 +28,83 @@
   filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5));
 }
 
+/* A brief, self-clearing acknowledgement of a page event — owns its own
+   transform on a dedicated wrapper so it never fights `.sprite`'s facing
+   flip or `.wiggle`'s own continuous idle bounce underneath it. Each state
+   plays once (no infinite loop) and settles back to neutral; Mascot removes
+   the `data-reaction` attribute once the reaction's timeout fires. */
+.reaction {
+  transform-origin: center;
+}
+
+.reaction[data-reaction="success"] {
+  animation: niaSuccess 0.35s ease-out;
+}
+
+.reaction[data-reaction="error"] {
+  animation: niaError 0.28s ease-in-out;
+}
+
+.reaction[data-reaction="project"] {
+  animation: niaProject 0.32s ease-out;
+}
+
+.reaction[data-reaction="processing"] {
+  animation: niaProcessing 0.7s ease-in-out;
+}
+
+@keyframes niaSuccess {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-6px) scale(1.06);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes niaError {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes niaProject {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes niaProcessing {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.85;
+  }
+}
+
 /* A chunky, discrete-step bounce (not smooth easing) — smooth interpolation
    on a crisp pixel-grid sprite looks blurry/wrong; real sprite animation
    hops between a handful of fixed frames, which steps() gives us for free. */

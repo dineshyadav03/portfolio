@@ -10,6 +10,15 @@
   --term-mint: #bcd6ad;
   --term-selection: #ff5a2e;
   --page-bg: #000000;
+  /* The one entrance/reveal easing curve used across the whole site —
+     see lib/motion.ts's `EASE`/`EASE_CSS` for the framer-motion side of
+     the same curve. Module CSS transitions should reference this instead
+     of the generic `ease`/`ease-out` keywords, so a hover state and a
+     scroll reveal settle with the same physical character. Continuous
+     pointer-driven motion (tile tilt, SpatialObject) intentionally stays
+     on damp()'s exponential decay instead — a different, physically
+     correct model for that kind of interaction, not a curve mismatch. */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme="light"] {

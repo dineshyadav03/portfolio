@@ -1,11 +1,15 @@
+import { capabilities, projects } from "@/lib/content";
 import styles from "./BootHud.module.css";
 
 const BARS = [40, 85, 60, 95, 50, 75, 35];
+// Real counts from the site's own data, not flavor text — the boot
+// sequence's "systems coming online" payoff should report on the actual
+// systems this site has, not a generic sci-fi dashboard.
 const READOUTS = [
-  { label: "core", value: "ok" },
-  { label: "uplink", value: "stable" },
-  { label: "mem", value: "94%" },
-  { label: "sensors", value: "armed" },
+  { label: "projects", value: `${projects.length} loaded` },
+  { label: "capabilities", value: `${capabilities.length} indexed` },
+  { label: "nia", value: "online" },
+  { label: "core", value: "ready" },
 ];
 
 // A short, dense sci-fi dashboard scene shown for a few seconds right after

@@ -36,6 +36,34 @@
   padding-bottom: 32px;
 }
 
+/* A single-shot version of PageGlitch's own periodic burst (same RGB
+   drop-shadow split, same contrast bump, same short translate) — reused
+   visual language, not a new glitch style, just triggered on demand for
+   ~220ms instead of running on an infinite 7s loop. */
+.bodyGlitch {
+  animation: eventGlitch 0.22s ease-out;
+}
+
+@keyframes eventGlitch {
+  0%,
+  100% {
+    filter: none;
+    transform: translate(0, 0);
+  }
+  30% {
+    filter: drop-shadow(-2px 0 #ff3b3b) drop-shadow(2px 0 #3bf0ff) contrast(1.15);
+    transform: translate(-2px, 1px);
+  }
+  60% {
+    filter: drop-shadow(2px 0 #ff3b3b) drop-shadow(-2px 0 #3bf0ff) contrast(1.2);
+    transform: translate(1px, -1px);
+  }
+  85% {
+    filter: none;
+    transform: translate(0, 0);
+  }
+}
+
 .kickerRow {
   display: flex;
   align-items: baseline;

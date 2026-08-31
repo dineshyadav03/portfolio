@@ -1,0 +1,188 @@
+.wrap {
+  margin-top: 6px;
+  display: flex;
+  gap: 32px;
+  /* The diagram (220px) is shorter than the text panel beside it (varies
+     with content, currently ~390px) — flex-start left it stranded at the
+     top with visible dead space below. Centering keeps it anchored to the
+     content it annotates instead of floating disconnected from it. */
+  align-items: center;
+}
+
+.diagram {
+  flex-shrink: 0;
+  width: 220px;
+  height: 220px;
+  overflow: visible;
+}
+
+/* Pass 16: activation and decay are no longer symmetric. CSS resolves a
+   transition's duration/easing from the style being transitioned INTO, not
+   the one being left — so putting a slow "settle" duration on the resting
+   rule and a fast "commit" duration on the active rule gives activation a
+   decisive 150ms snap while deactivation settles back over 500ms, an
+   ACTIVE → DECAY → REST feel instead of one symmetric ON/OFF toggle. Same
+   applies to .hub/.hubLabel/.nodeDot/.nodeLabel/.group/.groupLabel below. */
+.line {
+  stroke: var(--term-border);
+  stroke-width: 1;
+  transition: stroke 0.5s var(--ease-standard), stroke-width 0.5s var(--ease-standard), opacity 0.5s var(--ease-standard);
+}
+
+.line[data-active="true"] {
+  stroke: var(--term-accent);
+  stroke-width: 1.5;
+  transition: stroke 0.15s var(--ease-standard), stroke-width 0.15s var(--ease-standard);
+}
+
+/* When something else is active, an unrelated line recedes rather than
+   staying at full weight — the "relationship" cue Pass 9 asks for: this
+   diagram should show what's connected by also showing what isn't. */
+.diagram[data-selecting="true"] .line:not([data-active="true"]) {
+  opacity: 0.4;
+}
+
+.hub {
+  fill: var(--term-bg);
+  stroke: var(--term-fg-dim);
+  stroke-width: 1;
+  transition: stroke 0.5s var(--ease-standard), fill-opacity 0.5s var(--ease-standard);
+}
+
+/* The hub visually enters an "active" state whenever any node is selected
+   — SYS is where every capability line originates, so it should register
+   as part of the same relationship the line/node highlighting already
+   shows, not sit inert while everything around it responds. */
+.diagram[data-selecting="true"] .hub {
+  stroke: var(--term-accent);
+  fill: var(--term-accent);
+  fill-opacity: 0.1;
+  transition: stroke 0.15s var(--ease-standard), fill-opacity 0.15s var(--ease-standard);
+}
+
+.hubLabel {
+  fill: var(--term-fg-dim);
+  font-size: 7px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-anchor: middle;
+  letter-spacing: 0.05em;
+  transition: fill 0.5s var(--ease-standard);
+}
+
+.diagram[data-selecting="true"] .hubLabel {
+  fill: var(--term-accent);
+  transition: fill 0.15s var(--ease-standard);
+}
+
+.packet {
+  fill: var(--term-mint);
+}
+
+.node {
+  cursor: pointer;
+}
+
+.nodeDot {
+  fill: var(--term-bg);
+  stroke: var(--term-mint);
+  stroke-width: 1.2;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.5s var(--ease-standard), stroke 0.5s var(--ease-standard), r 0.5s var(--ease-standard),
+    opacity 0.5s var(--ease-standard);
+}
+
+.node[data-active="true"] .nodeDot {
+  fill: var(--term-mint);
+  stroke: var(--term-mint);
+  transition: fill 0.15s var(--ease-standard), stroke 0.15s var(--ease-standard);
+}
+
+.diagram[data-selecting="true"] .node:not([data-active="true"]) .nodeDot {
+  opacity: 0.45;
+}
+
+.node:focus-visible .nodeDot {
+  outline: none;
+  stroke: var(--term-accent);
+  stroke-width: 2;
+}
+
+.nodeLabel {
+  fill: var(--term-fg-dim);
+  font-size: 7.5px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: fill 0.5s var(--ease-standard);
+  pointer-events: none;
+}
+
+.node[data-active="true"] .nodeLabel {
+  fill: var(--term-fg);
+  transition: fill 0.15s var(--ease-standard);
+}
+
+.node:focus-visible .nodeLabel {
+  fill: var(--term-accent);
+}
+
+.groups {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 12px;
+}
+
+.group {
+  padding: 10px 12px;
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+  transition: border-color 0.5s var(--ease-standard), opacity 0.5s var(--ease-standard);
+}
+
+.group[data-active="true"] {
+  border-color: var(--term-mint);
+  transition: border-color 0.15s var(--ease-standard);
+}
+
+.groups[data-selecting="true"] .group:not([data-active="true"]) {
+  opacity: 0.55;
+}
+
+.groupLabel {
+  margin: 0 0 6px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+
+.group[data-active="true"] .groupLabel {
+  color: var(--term-mint);
+}
+
+.groupItems {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--term-fg-dim);
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .diagram {
+    width: 180px;
+    height: 180px;
+  }
+
+  .groups {
+    width: 100%;
+  }
+}

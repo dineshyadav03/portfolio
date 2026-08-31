@@ -1,0 +1,224 @@
+/* Fixed independently of Nia's own wandering `.wrap` (not nested inside
+   it, not relative to her current `right` offset) — the panel stays put
+   near her general resting position while she wanders, rather than
+   dragging a chat window around the screen. Sits above her z-index so it
+   never renders behind her sprite/ring. */
+.panel {
+  position: fixed;
+  right: 16px;
+  bottom: 116px;
+  z-index: 55;
+  width: min(300px, calc(100vw - 32px));
+  max-height: min(440px, calc(100dvh - 160px));
+  display: flex;
+  flex-direction: column;
+  background: var(--term-titlebar);
+  border: 1px solid var(--term-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.35);
+  padding: 12px 12px 10px;
+  font-size: 0.8rem;
+  color: var(--term-fg);
+  animation: panelIn 0.18s ease-out;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.headerTitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--term-accent);
+}
+
+.close {
+  background: transparent;
+  border: none;
+  color: var(--term-muted);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--term-fg);
+}
+
+.close:focus-visible {
+  outline: 1px solid var(--term-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.subtitle {
+  margin: 0 0 8px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+
+.hint {
+  margin: 0 0 8px;
+  color: var(--term-fg-dim);
+}
+
+.conversation {
+  overflow-y: auto;
+  max-height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-right: 2px;
+}
+
+.exchange {
+  font-size: 0.78rem;
+}
+
+.question {
+  margin: 0 0 2px;
+  color: var(--term-fg);
+}
+
+.chevron {
+  color: var(--term-accent);
+}
+
+.niaLabel {
+  margin: 0 0 2px;
+  padding-left: 14px;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--term-muted);
+}
+
+.answer,
+.answerUnknown {
+  margin: 0;
+  padding-left: 14px;
+  color: var(--term-fg-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.answerUnknown {
+  color: var(--term-muted);
+  font-style: italic;
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.chip {
+  background: transparent;
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  color: var(--term-fg-dim);
+  font-size: 0.68rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  color: var(--term-fg);
+  border-color: var(--term-accent);
+}
+
+.chip:focus-visible {
+  outline: 1px solid var(--term-accent);
+  outline-offset: 2px;
+}
+
+.form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--term-border);
+}
+
+.prompt {
+  flex-shrink: 0;
+  color: var(--term-accent);
+  font-size: 0.85rem;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--term-fg);
+  font-family: inherit;
+  font-size: 0.8rem;
+  caret-color: var(--term-accent);
+}
+
+.input::placeholder {
+  color: var(--term-muted);
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.submit {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  color: var(--term-accent);
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.submit:hover {
+  border-color: var(--term-accent);
+}
+
+.submit:focus-visible {
+  outline: 1px solid var(--term-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .panel {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: auto;
+    max-height: min(400px, calc(100dvh - 96px));
+  }
+}

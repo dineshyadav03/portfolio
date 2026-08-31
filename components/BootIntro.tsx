@@ -17,6 +17,7 @@ import {
   WELCOME_START_MS,
   WELCOME_TEXT,
 } from "@/lib/bootTiming";
+import { setSystemStatus } from "@/lib/systemStatus";
 import styles from "./BootIntro.module.css";
 
 const GLOBE = globeBitmap();
@@ -176,7 +177,14 @@ export default function BootIntro() {
   const [sweeping, setSweeping] = useState(false);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced) {
+      // No boot sequence plays, so the system is "ready" from the first
+      // frame — the status system (lib/systemStatus.ts) shouldn't be stuck
+      // reporting "boot" forever just because the visual overlay was
+      // skipped.
+      setSystemStatus("ready");
+      return;
+    }
 
     // Plays on every fresh page load (not gated behind sessionStorage) so
     // it's reliably visible each time the site is opened or reloaded.
@@ -194,6 +202,12 @@ export default function BootIntro() {
     let sweepOff: ReturnType<typeof setTimeout>;
     const hide = setTimeout(() => {
       setVisible(false);
+      // The real BOOT → READY handoff — the moment the overlay actually
+      // clears is the moment the rest of the system (SysHeaderBar's live
+      // status line, SpatialObject's power-up energy) gets to know boot is
+      // over, instead of each of them guessing at the same timing constant
+      // independently.
+      setSystemStatus("ready");
       // A full-width scanline sweeps down over the real page right as it's
       // revealed — a deliberate "signal coming through" beat instead of the
       // site just appearing once the overlay fades, since a flat cross-fade

@@ -1,5 +1,36 @@
+/* Pass 17: this was previously capped at a flat 170px on virtually every
+   real screen (min(170px, 42vw) — 42vw only wins below ~405px wide), so
+   the site's one dedicated 3D element — the literal first thing a visitor
+   sees — rendered as a small decorative icon rather than a system with
+   real presence. SpatialObject's internal canvas scale already derives
+   entirely from its container's measured width (no JS change needed
+   here), so this is a pure composition fix: the geometry gets genuinely
+   larger and more detailed, not just re-timed. */
+/* Pass 19: a genuinely distinct spatial register for the hero, not a
+   bigger version of the same 900px column every other section uses. See
+   the JSX comment in page.tsx for the full reasoning. */
+.chamber {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 56px 16px 24px;
+  min-height: 74vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--term-titlebar);
+  border-bottom: 1px dotted var(--term-border);
+  margin-bottom: 24px;
+}
+
+.spatialWrap {
+  width: min(280px, 58vw);
+  margin: 0 auto 22px;
+}
+
 .wordmark {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   color: var(--term-fg);
   overflow-x: auto;
   display: flex;
@@ -10,24 +41,64 @@
   display: flex;
   gap: 32px;
   align-items: flex-start;
+  /* The chamber's own background/border spans the full viewport, but the
+     actual readable content still lines up with the same ~900px column
+     every other section on the site uses — the chamber is atmosphere,
+     not an invitation to stretch text across an ultrawide monitor. */
+  width: 100%;
+  max-width: 900px;
+  /* A deliberate pause before the page hands off to Capabilities — the
+     "compression → expansion → focus → release" rhythm the hero/section
+     boundary was missing when every section used identical spacing.
+     Combines with SectionDivider's own 40px top margin for a real beat,
+     not just the same rhythm as every other section-to-section gap. */
+  margin-bottom: 12px;
 }
 
 .portrait {
   flex-shrink: 0;
   padding-top: 4px;
+  position: relative;
+  /* Confines DotField's negative z-index to just this box, so it recedes
+     behind the ASCII layers without any risk of bleeding behind unrelated
+     page content further up the stacking order. */
+  isolation: isolate;
 }
 
 .intro {
   min-width: 0;
 }
 
+/* Pass 18: real three-tier hierarchy — `.identity` (profile.role, the
+   actual job title) is now the poster-scale claim; `.role` (the tagline
+   sentence) is the structured secondary line beneath it; `.tags`/
+   `.bioBlock` below are system metadata, visually set apart with a rule
+   rather than reading as more paragraph text at the same weight. */
+.identity {
+  margin: 0 0 10px;
+  /* Capped rather than filling the column — Mascot.tsx (Nia's own on-page
+     character) deliberately wanders a reserved band near the right edge,
+     "clear of the body text" by that component's own design. Text running
+     flush to the column's edge encroaches on that band; a sensible
+     editorial measure keeps a real margin there regardless of viewport
+     width, without needing to touch Mascot's own logic at all. */
+  max-width: 22ch;
+  font-size: 2.3rem;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--term-fg);
+}
+
 .role {
   margin: 0 0 14px;
-  font-size: 1.15rem;
-  line-height: 1.4;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: var(--term-fg);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--term-fg-dim);
+  max-width: 48ch;
 }
 
 .cursor {
@@ -55,17 +126,44 @@
   color: var(--term-mint);
 }
 
+/* A visual rule setting the bio paragraphs apart as annotation/metadata
+   rather than a continuation of the tagline's flowing prose — the same
+   "left border = subordinate detail" language used for the terminal
+   command scrollback elsewhere on the site. */
+.bioBlock {
+  margin-top: 6px;
+  padding-left: 14px;
+  border-left: 2px solid var(--term-border);
+}
+
 .bioLine {
   margin: 0 0 10px;
-  color: var(--term-fg-dim);
-  font-size: 0.85rem;
+  color: var(--term-muted);
+  font-size: 0.8rem;
   line-height: 1.6;
   max-width: 46ch;
+}
+
+.bioLine:last-child {
+  margin-bottom: 0;
 }
 
 @media (max-width: 640px) {
   .hero {
     flex-direction: column;
     gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .identity {
+    font-size: 1.7rem;
+  }
+
+  .role {
+    font-size: 0.95rem;
+  }
+
+  .spatialWrap {
+    width: min(220px, 52vw);
   }
 }

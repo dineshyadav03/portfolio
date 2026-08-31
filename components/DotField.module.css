@@ -1,0 +1,39 @@
+.field {
+  position: absolute;
+  inset: -16px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  width: 100%;
+  height: 100%;
+}
+
+.dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s ease-out;
+}
+
+.dot::before {
+  content: "";
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--term-border);
+}
+
+/* Hidden below the hero's own stacked-layout breakpoint — the mobile hero
+   is already tight on space, and this field is a desktop-pointer effect
+   with nothing to react to on touch anyway (the component never attaches
+   its listener there either). */
+@media (max-width: 640px) {
+  .field {
+    display: none;
+  }
+}

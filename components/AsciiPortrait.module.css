@@ -1,8 +1,33 @@
+/* Establishes the 3D viewing context for the layered portrait below — a
+   restrained perspective distance for a shallow-object feel, not a
+   dramatic one. `perspective` only affects descendants, which is why it
+   lives on this separate outer element rather than on .wrap itself (the
+   element actually being rotated). */
+.scene {
+  perspective: 800px;
+  max-width: 100%;
+}
+
+/* Reduced motion: no perspective at all, so any translateZ on the layers
+   below becomes fully inert rather than merely unanimated — the portrait
+   renders exactly as flat as it did before this stage. */
+.scene[data-flat="true"] {
+  perspective: none;
+}
+
 .wrap {
   position: relative;
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
+  transform-style: preserve-3d;
+  /* Smooths the mouse-parallax offset set inline via JS — a subtle depth
+     cue, not an instant snap to the pointer's exact position. */
+  transition: transform 0.2s ease-out;
+}
+
+.wrap[data-flat="true"] {
+  transform-style: flat;
 }
 
 .art {
@@ -14,6 +39,7 @@
   color: var(--term-fg-dim);
   white-space: pre;
   user-select: none;
+  transform: translateZ(0);
 }
 
 @media (min-width: 480px) {
@@ -44,28 +70,39 @@
 /* Windowed to land inside the same 95-96.8% slice of the shared 7s loop as
    PageGlitch's whole-page burst (below), so the portrait's own RGB split
    reads as part of one coordinated system-glitch moment instead of a
-   second, separately-timed flicker ~300ms apart. */
+   second, separately-timed flicker ~300ms apart.
+
+   Each layer's depth (translateZ) is baked into every keyframe stop,
+   including the resting 0%/100% state, rather than set as a separate
+   static rule on .layerRed/.layerCyan — an animated `transform` property
+   owns that property for its whole active duration (this animation runs
+   `infinite`), so a static translateZ declaration on the class itself
+   would never actually take effect. Red sits at 4px, cyan at 7px — two
+   distinct depth planes rather than one, so they read as separate layers
+   in the stack and pick up a small amount of natural perspective parallax
+   as the whole group rotates with the pointer, with no extra offset math
+   needed per layer. */
 @keyframes glitchRed {
   0%,
   95%,
   100% {
     opacity: 0;
-    transform: translate(0, 0);
+    transform: translate3d(0, 0, 4px);
     clip-path: inset(0 0 0 0);
   }
   95.6% {
     opacity: 0.7;
-    transform: translate(-2px, 1px);
+    transform: translate3d(-2px, 1px, 4px);
     clip-path: inset(15% 0 55% 0);
   }
   96.2% {
     opacity: 0.6;
-    transform: translate(1px, -1px);
+    transform: translate3d(1px, -1px, 4px);
     clip-path: inset(60% 0 5% 0);
   }
   96.8% {
     opacity: 0;
-    transform: translate(0, 0);
+    transform: translate3d(0, 0, 4px);
     clip-path: inset(0 0 0 0);
   }
 }
@@ -75,22 +112,22 @@
   95.2%,
   100% {
     opacity: 0;
-    transform: translate(0, 0);
+    transform: translate3d(0, 0, 7px);
     clip-path: inset(0 0 0 0);
   }
   95.8% {
     opacity: 0.6;
-    transform: translate(2px, 0);
+    transform: translate3d(2px, 0, 7px);
     clip-path: inset(35% 0 30% 0);
   }
   96.4% {
     opacity: 0.5;
-    transform: translate(-1px, 1px);
+    transform: translate3d(-1px, 1px, 7px);
     clip-path: inset(5% 0 70% 0);
   }
   96.9% {
     opacity: 0;
-    transform: translate(0, 0);
+    transform: translate3d(0, 0, 7px);
     clip-path: inset(0 0 0 0);
   }
 }

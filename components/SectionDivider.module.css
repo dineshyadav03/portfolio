@@ -15,7 +15,29 @@
   color: var(--term-muted);
 }
 
-.rule {
+.track {
+  position: relative;
   flex: 1;
+}
+
+.rule {
+  display: block;
   border-top: 1px dotted var(--term-border);
+  transform-origin: left;
+}
+
+/* The handoff signal — see SectionDivider.tsx. A small lit dot, the same
+   mint "packet in transit" color the hero/project visuals already use,
+   swept left→right along the rule once per reveal. Absolutely positioned
+   within .track so it never affects the rule's own layout. */
+.sweep {
+  position: absolute;
+  top: -3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--term-mint);
+  box-shadow: 0 0 6px 0 var(--term-mint);
+  transform: translateX(-50%);
+  pointer-events: none;
 }

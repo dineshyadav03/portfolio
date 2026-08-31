@@ -95,6 +95,21 @@ export const howIWork = [
   { step: "iterate", detail: "Use real-world feedback to improve the system." },
 ] as const;
 
+// A conceptual pipeline pattern — not a live system, not tied to real-time
+// telemetry from any specific project. Grounded in real, already-stated
+// facts: hybrid retrieval and citation-enforced generation are taxcite's
+// actual architecture (see projects below); tool-calling is cody's actual
+// mechanism. This is a visual restatement of already-true positioning, not
+// an invented capability.
+export const systemPipeline = [
+  { id: "input", label: "input", detail: "a user request or a raw data source enters the system" },
+  { id: "retrieval", label: "retrieval", detail: "hybrid dense + keyword search pulls real, grounded context" },
+  { id: "model", label: "model", detail: "an LLM reasons over the retrieved context, not free recall" },
+  { id: "tools", label: "tools", detail: "function calls reach into real systems and APIs when needed" },
+  { id: "output", label: "output", detail: "a checked response is delivered into the user's environment" },
+  { id: "feedback", label: "feedback", detail: "results are evaluated and fed back into the next iteration" },
+] as const;
+
 export const announcement = {
   // Flip to true once there's a real announcement — a visible "TODO" banner
   // on a live site reads as unfinished rather than in-progress.

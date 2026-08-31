@@ -1,33 +1,183 @@
+/* A visual grid, not a flat list — two columns above tablet width, one
+   below. Deliberately not a bordered "card": no background, no
+   box-shadow, no border-radius, matching the site's established flat
+   chrome. Separation between tiles comes from generous internal spacing
+   and a single bottom rule, the same restrained language the old list
+   already used, just with far more room per project. */
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 40px;
+}
+
+@media (max-width: 760px) {
+  .list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .item {
-  padding: 14px 0;
+  padding: 22px 0;
   border-bottom: 1px solid var(--term-border);
+  /* Restrained 3D context for .tiltWrap below — perspective lives on this
+     parent, not on the rotated element itself, and is a separate CSS
+     property from `transform`, so it doesn't interact with this element's
+     own `transform: translateX(4px)` on hover (framer-motion's
+     whileHover, untouched). */
+  perspective: 1000px;
 }
 
 .item:last-child {
   border-bottom: none;
 }
 
+/* No CSS `transition` on .tiltWrap/.visualWrap's transform — as of
+   Pass 15, CreationsList's own rAF loop already damps every value it
+   writes here (see lib/physics.ts's `damp()`), frame by frame, at a
+   physically deliberate rate. A CSS transition on top of that would
+   re-smooth an already-smoothed, continuously-changing value — two
+   competing interpolations fighting over the same property, which reads
+   as extra lag rather than physical weight. The loop IS the transition.
+   opacity is a different channel (never touched by the pointer-physics
+   loop), so it keeps its own transition below for the recede effect. */
+.tiltWrap {
+  transition: opacity 0.3s var(--ease-standard);
+}
+
+.visualWrap {
+  margin: 12px 0 16px;
+  max-width: 320px;
+  opacity: 0.9;
+}
+
+/* Pass 18/19: when one project is focused, the others visibly recede — real
+   :has() (no JS, no second listener), reading the exact same
+   `data-hovering`/`data-launching` attributes the pointer-physics loop in
+   CreationsList.tsx already sets. This makes the grid feel like one
+   system where attention is a shared, finite resource, not five
+   independent cards that don't know about each other.
+   Targets .tiltWrap, not .item/.li — the <li> is a framer-motion
+   `motion.li` whose entrance variant already claims its own `opacity` via
+   an inline style once the reveal animation settles, which would always
+   win over any CSS class rule targeting the same element regardless of
+   specificity. .tiltWrap is a plain div with no such conflict. Falls back
+   invisibly (full opacity) in the small set of browsers without :has()
+   support — a graceful no-op, not a broken state.
+   The scale-down here is safe specifically because it only ever applies
+   to a tile that is NOT the one being interacted with — CreationsList's
+   rAF loop only ever writes to the active tile's own .tiltWrap.style
+   .transform, so a receding sibling's transform is free for this
+   transition to own outright, no conflict.
+   Pass 20: added grayscale+brightness. opacity/scale alone still read as
+   "the same tile, slightly dimmed" at a glance; pulling the color out
+   entirely is what actually reads as "not the thing you're looking at
+   right now" — the classic photographic rack-focus cue, not a new visual
+   idea. `filter` is inherited visually by every descendant (text and the
+   ProjectVisual SVG alike) from this one declaration, so it doesn't need
+   its own rule anywhere else. */
+.list:has([data-hovering="true"], [data-launching="true"]) .item:not(:has([data-hovering="true"], [data-launching="true"])) .tiltWrap {
+  opacity: 0.35;
+  transform: scale(0.97);
+  filter: grayscale(0.85) brightness(0.82);
+  transition:
+    opacity 0.3s var(--ease-standard),
+    transform 0.3s var(--ease-standard),
+    filter 0.3s var(--ease-standard);
+}
+
+/* Pass 18: a real title-bar/body separation — one rule under the index +
+   state row, not a full box around the tile (that reads as "decorative
+   terminal chrome," not a system). The rule alone is enough to make the
+   header row register as a distinct strip the rest of the project sits
+   beneath, the same way a window's title bar is visually separate from
+   its content without needing its own border on every side. */
 .itemHead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  margin-bottom: 6px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--term-border);
+}
+
+.stateRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stateDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* No `status` field = an owned, still-changing build — a solid, lit dot
+   (the same mint "this is live" language the site already uses, e.g.
+   HowIWork's resolved-stage markers). A real `merged` status settles into
+   a hollow ring instead — resolved, no longer actively changing. `open`
+   (a contribution still under review) keeps the accent color, unsettled. */
+.stateDot[data-state="active"] {
+  background: var(--term-mint);
+  box-shadow: 0 0 4px 0 var(--term-mint);
+}
+
+.stateDot[data-state="merged"] {
+  background: transparent;
+  border: 1px solid var(--term-mint);
+}
+
+.stateDot[data-state="open"] {
+  background: var(--term-accent);
+  box-shadow: 0 0 4px 0 var(--term-accent-glow);
 }
 
 .index {
+  display: inline-block;
   color: var(--term-border);
   font-size: 0.68rem;
   letter-spacing: 0.02em;
   flex-shrink: 0;
+  /* transform is written every frame by the same damped rAF loop as
+     .tiltWrap/.visualWrap above — no transition on it here either, for
+     the same reason. color is a discrete on/off state change (hover),
+     so it keeps a transition, standardized to the site's one ease. */
+  transition: color 0.2s var(--ease-standard);
+}
+
+/* Rides the same data-hovering attribute the tilt/visual-depth response
+   already sets (see CreationsList.tsx) — one pointer sample, one more
+   coordinated response, not a second listener. The index brightening
+   alongside the tile lifting and the visual gaining depth reinforces
+   "this is the focused project" as one system reacting together. */
+.tiltWrap[data-hovering="true"] .index {
+  color: var(--term-mint);
+}
+
+/* The brief "launching" beat before an external project link actually
+   navigates (see CreationsList.tsx) — reuses the title's existing hover
+   color and the arrow's existing reveal/commit animation rather than
+   inventing a new visual language for one 260ms moment. No transform here
+   (that channel belongs to the pointer-physics loop already running on
+   this element); color and the arrow's own transform are untouched by
+   that loop, so nothing fights. */
+.tiltWrap[data-launching="true"] .index {
+  color: var(--term-accent);
+}
+
+.tiltWrap[data-launching="true"] .itemName a {
+  color: var(--term-accent);
+}
+
+.tiltWrap[data-launching="true"] .arrow {
+  opacity: 1;
+  transform: translateX(4px);
 }
 
 .status {
@@ -46,24 +196,30 @@
 }
 
 .itemName {
-  margin: 0;
-  display: inline;
-  font-size: 0.98rem;
+  margin: 0 0 8px;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--term-fg);
-  text-decoration: none;
 }
 
 .itemName a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: inherit;
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color 0.15s var(--ease-standard);
 }
 
 .itemName a:hover {
   color: var(--term-accent);
+}
+
+.itemName a:hover .arrow {
+  transform: translateX(2px);
+  opacity: 1;
 }
 
 .itemName a:focus-visible {
@@ -72,16 +228,86 @@
   border-radius: 2px;
 }
 
+.arrow {
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: transform 0.15s var(--ease-standard), opacity 0.15s var(--ease-standard);
+}
+
 .itemDesc {
-  margin: 0 0 6px;
+  margin: 0 0 12px;
   color: var(--term-fg-dim);
   font-size: 0.85rem;
   line-height: 1.6;
-  max-width: 60ch;
+  max-width: 52ch;
 }
 
+/* Pass 21: when a project becomes the active process (the same
+   [data-hovering] attribute the tilt/visual/index already read), its
+   description and metadata visibly *arrive* a beat after the title and
+   visual already have — a real front-to-back cascade instead of every
+   part of the tile reacting in perfect unison. This is what makes focus
+   read as "the system surfacing this project's detail" rather than a flat
+   hover toggle. `backwards` fill-mode holds each element at the 0%
+   keyframe through its own delay, so the stagger is visible, not just a
+   timing offset with nothing to show for it. */
+@keyframes metadataArrive {
+  from {
+    opacity: 0.45;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tiltWrap[data-hovering="true"] .itemDesc {
+  animation: metadataArrive 0.35s var(--ease-standard) backwards;
+  animation-delay: 0.03s;
+}
+
+/* Metadata chips, not an inline "A · B · C" run — reads as tags, not as
+   another sentence to parse. */
 .stack {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stack li {
   color: var(--term-mint);
-  font-size: 0.75rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+}
+
+/* The stagger continues past the description — each chip arrives a beat
+   after the last, so the metadata reads as propagating out of the active
+   project rather than appearing as one block. Capped at five explicit
+   steps; any further chip (rare — most projects list 3-4) shares the last
+   delay rather than growing the rule indefinitely. */
+.tiltWrap[data-hovering="true"] .stack li {
+  animation: metadataArrive 0.3s var(--ease-standard) backwards;
+}
+.tiltWrap[data-hovering="true"] .stack li:nth-child(1) {
+  animation-delay: 0.08s;
+}
+.tiltWrap[data-hovering="true"] .stack li:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.tiltWrap[data-hovering="true"] .stack li:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.tiltWrap[data-hovering="true"] .stack li:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.tiltWrap[data-hovering="true"] .stack li:nth-child(n + 5) {
+  animation-delay: 0.24s;
 }

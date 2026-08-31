@@ -27,6 +27,7 @@
   border-radius: 50%;
   background: var(--term-border);
   flex-shrink: 0;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .dot[data-on="true"] {

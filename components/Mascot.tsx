@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import PixelSprite from "./PixelSprite";
 import { mascotBitmap } from "@/lib/mascotBitmap";
 import { useBootRevealDelay } from "@/lib/bootTiming";
 import { playGreetChirp } from "@/lib/sound";
+import { onNiaReaction, type NiaReactionState } from "@/lib/niaReaction";
+import NiaAssistant from "./NiaAssistant";
 import styles from "./Mascot.module.css";
 
 const SPRITE_OPEN = mascotBitmap(19, 18, true, false);
@@ -14,6 +16,15 @@ const SPRITE_WAVE = mascotBitmap(19, 18, true, true);
 const GREETINGS = ["hi, i'm nia", "poking around too?", "this site's still growing", "*waves*"];
 const AMBIENT_INTERVAL_MS = 6000;
 const BUBBLE_MS = 2000;
+
+// Each transient reaction clears itself after this many ms — a newer
+// reaction replaces whatever's still playing rather than queuing behind it.
+const REACTION_MS: Record<NiaReactionState, number> = {
+  success: 350,
+  error: 280,
+  project: 320,
+  processing: 700,
+};
 
 // Keeps Nia off to the right, clear of the body text she used to wander
 // across. Positioned via `right`, not `left` — anchoring from the right
@@ -34,6 +45,11 @@ export default function Mascot() {
   const [eyesOpen, setEyesOpen] = useState(true);
   const [greeting, setGreeting] = useState<string | null>(null);
   const [waving, setWaving] = useState(false);
+  const [reaction, setReaction] = useState<{ state: NiaReactionState; id: number } | null>(null);
+  const reactionIdRef = useRef(0);
+  const reactionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   // She's mounted (and behind the boot overlay) for the whole boot sequence,
   // but her wander/blink/ambient-greet timers shouldn't start counting down
@@ -47,7 +63,11 @@ export default function Mascot() {
   }, [reduced, bootDelaySec]);
 
   useEffect(() => {
-    if (reduced || !ready) return;
+    // Paused while the assistant is open — a chat panel next to a mascot
+    // that keeps drifting away from it reads as broken, not alive, and the
+    // panel is deliberately anchored to her resting position rather than
+    // tracking her live wander offset.
+    if (reduced || !ready || assistantOpen) return;
     const id = setInterval(() => {
       setRight((prev) => {
         const next = Math.max(WANDER_MIN, Math.min(WANDER_MAX, prev + (Math.random() * 20 - 10)));
@@ -59,7 +79,7 @@ export default function Mascot() {
       });
     }, 4500);
     return () => clearInterval(id);
-  }, [reduced, ready]);
+  }, [reduced, ready, assistantOpen]);
 
   useEffect(() => {
     if (reduced || !ready) return;
@@ -82,42 +102,84 @@ export default function Mascot() {
   }
 
   // She speaks up on her own every so often, not just when clicked — a
-  // sign of life rather than a one-shot easter egg.
+  // sign of life rather than a one-shot easter egg. Paused while the
+  // assistant is open so an unrelated ambient bubble doesn't pop up over
+  // an in-progress conversation.
   useEffect(() => {
-    if (reduced || !ready) return;
+    if (reduced || !ready || assistantOpen) return;
     const id = setInterval(() => showBubble(false), AMBIENT_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [reduced, ready]);
+  }, [reduced, ready, assistantOpen]);
 
   function handleActivate() {
     showBubble(true);
+    setAssistantOpen(true);
   }
+
+  // A brief, self-clearing acknowledgement of something happening elsewhere
+  // on the page (a command outcome, a project opening, the pipeline's
+  // discrete processing pulse) — entirely visual, bypassed under reduced
+  // motion, and never wired to sound (lib/sound.ts is untouched by this).
+  // Skipping the subscription outright under reduced motion, rather than
+  // subscribing and no-op'ing per event, mirrors TerminalWindow's own
+  // onGlitchTrigger handling.
+  useEffect(() => {
+    if (reduced) return;
+    return onNiaReaction((state) => {
+      if (reactionTimeoutRef.current) clearTimeout(reactionTimeoutRef.current);
+      reactionIdRef.current += 1;
+      setReaction({ state, id: reactionIdRef.current });
+      reactionTimeoutRef.current = setTimeout(() => setReaction(null), REACTION_MS[state]);
+    });
+  }, [reduced]);
+
+  useEffect(() => {
+    return () => {
+      if (reactionTimeoutRef.current) clearTimeout(reactionTimeoutRef.current);
+    };
+  }, []);
 
   const sprite = waving ? SPRITE_WAVE : eyesOpen ? SPRITE_OPEN : SPRITE_CLOSED;
 
   return (
-    <div
-      className={styles.wrap}
-      style={{ right: `${right}%` }}
-      data-still={reduced ? "true" : undefined}
-      onClick={handleActivate}
-      role="button"
-      tabIndex={0}
-      aria-label="Nia — click to say hi"
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleActivate();
-        }
-      }}
-    >
-      <span className={styles.ring} data-active={waving} aria-hidden="true" />
-      {greeting && <div className={styles.bubble}>{greeting}</div>}
-      <div className={styles.sprite} style={{ transform: `scaleX(${facing})` }}>
-        <div className={styles.wiggle}>
-          <PixelSprite bitmap={sprite} size={5} />
+    <>
+      <div
+        ref={triggerRef}
+        className={styles.wrap}
+        style={{ right: `${right}%` }}
+        data-still={reduced ? "true" : undefined}
+        onClick={handleActivate}
+        role="button"
+        tabIndex={0}
+        aria-label="Nia — click to say hi and ask about Dinesh"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleActivate();
+          }
+        }}
+      >
+        <span className={styles.ring} data-active={waving} aria-hidden="true" />
+        {greeting && <div className={styles.bubble}>{greeting}</div>}
+        <div className={styles.sprite} style={{ transform: `scaleX(${facing})` }}>
+          <div
+            key={reaction ? `${reaction.state}-${reaction.id}` : "idle"}
+            className={styles.reaction}
+            data-reaction={reaction?.state}
+          >
+            <div className={styles.wiggle}>
+              <PixelSprite bitmap={sprite} size={5} />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      <NiaAssistant
+        open={assistantOpen}
+        onClose={() => {
+          setAssistantOpen(false);
+          triggerRef.current?.focus();
+        }}
+      />
+    </>
   );
 }

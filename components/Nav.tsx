@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { nav } from "@/lib/content";
+import { playNavClick } from "@/lib/sound";
 import styles from "./Nav.module.css";
 
 export default function Nav() {
@@ -19,6 +20,7 @@ export default function Nav() {
               href={item.href}
               className={active ? styles.active : styles.link}
               aria-current={active ? "page" : undefined}
+              onClick={() => playNavClick()}
             >
               <span className={styles.key} aria-hidden="true">
                 {i + 1}

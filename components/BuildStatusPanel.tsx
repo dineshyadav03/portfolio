@@ -1,4 +1,8 @@
+"use client";
+
+import { motion, type Variants } from "framer-motion";
 import { buildStatus, profile } from "@/lib/content";
+import { EASE, listContainer, listItem } from "@/lib/motion";
 import styles from "./BuildStatusPanel.module.css";
 
 const ACTIONS = [
@@ -7,10 +11,22 @@ const ACTIONS = [
   { label: "contact", href: `mailto:${profile.email}` },
 ];
 
+// Same inherited-state composition as StatusReadout (see its own comment)
+// — no independent whileInView here, app/page.tsx's existing "build"
+// section wrapper already owns the one trigger. `barFill` is the real
+// addition: buildStatus.percent was always a genuine number, but it used
+// to just appear at its final width the instant the section popped in —
+// nothing about that read as "counting up to" a value. Filling from 0 on
+// reveal makes the number feel measured, not just printed.
+const barFill: Variants = {
+  hidden: { width: "0%" },
+  show: { width: `${buildStatus.percent}%`, transition: { duration: 0.9, ease: EASE, delay: 0.15 } },
+};
+
 export default function BuildStatusPanel() {
   return (
-    <div className={styles.panel}>
-      <div className={styles.col}>
+    <motion.div className={styles.panel} variants={listContainer}>
+      <motion.div className={styles.col} variants={listItem}>
         <p className={styles.heading}>status</p>
         <svg className={styles.spinner} viewBox="0 0 40 40" aria-hidden="true">
           <circle
@@ -33,18 +49,22 @@ export default function BuildStatusPanel() {
           />
         </svg>
         <p className={styles.spinnerLabel}>in progress</p>
-      </div>
+      </motion.div>
 
-      <div className={styles.col}>
+      <motion.div className={styles.col} variants={listItem}>
         <p className={styles.heading}>content</p>
         <div className={styles.bar}>
-          <div className={styles.barFill} style={{ width: `${buildStatus.percent}%` }} />
+          {/* No CSS `transition: width` on this element anymore — this
+              motion value owns the width animation now, so the two
+              never compete over the same property (see
+              BuildStatusPanel.module.css). */}
+          <motion.div className={styles.barFill} variants={barFill} />
         </div>
         <p className={styles.barLabel}>{buildStatus.percent}% complete</p>
         <p className={styles.detail}>{buildStatus.detail}</p>
-      </div>
+      </motion.div>
 
-      <div className={styles.col}>
+      <motion.div className={styles.col} variants={listItem}>
         <p className={styles.heading}>actions</p>
         <div className={styles.actions}>
           {ACTIONS.map((action) =>
@@ -70,7 +90,7 @@ export default function BuildStatusPanel() {
             ),
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

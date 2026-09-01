@@ -1,0 +1,99 @@
+.panel {
+  display: none;
+}
+
+/* Same wide-viewport gate as CoreLog — see its own CSS for the reasoning.
+   Positioned in the upper portion of the right margin; HeroNeuralNet
+   takes the lower portion, so the two read as a matched pair framing the
+   object rather than one panel awkwardly alone. */
+@media (min-width: 1200px) {
+  .panel {
+    display: block;
+    position: absolute;
+    /* Left, not right — PageToc (components/PageToc.tsx) already owns
+       the right margin as a `position: fixed`, viewport-centered panel,
+       and this component's own `right: clamp(...)` offset landed in the
+       same real estate, confirmed live as an actual overlap at the top
+       of the page (both ~140-150px wide, both anchored close to the
+       right edge, at every width where either shows). Moving both new
+       panels here to the left column with CoreLog avoids fighting over
+       the same space rather than trying to out-position a fixed element
+       across every viewport size. */
+    left: clamp(20px, 5vw, 72px);
+    /* Fixed offset from .chamber's top, matching CoreLog's own — see its
+       CSS comment for why a percentage-based value doesn't track the
+       object's actual position. Placed below CoreLog with a real gap. */
+    top: 310px;
+    z-index: 1;
+    width: 150px;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--term-fg-dim);
+}
+
+.note {
+  font-size: 0.56rem;
+  font-style: italic;
+  color: var(--term-muted);
+}
+
+.diagram {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.link {
+  stroke: var(--term-border);
+  stroke-width: 0.5;
+}
+
+.node {
+  fill: var(--term-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .node {
+    animation: nodePulse 3.6s ease-in-out infinite;
+  }
+}
+
+@keyframes nodePulse {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.label {
+  fill: var(--term-fg-dim);
+  font-size: 5px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.caption {
+  margin: 6px 0 0;
+  font-size: 0.54rem;
+  font-style: italic;
+  color: var(--term-muted);
+  line-height: 1.4;
+}

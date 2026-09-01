@@ -1,13 +1,56 @@
 /* Square, responsive canvas host. The canvas itself is sized in JS (device
    pixels for crispness); this wrapper just reserves the layout box and
    gives the pointer-tilt something to measure against. */
+/* `z-index: 0` (not just `position: relative`) is load-bearing here — it
+   makes .wrap establish its OWN stacking context, so the glow pseudo-
+   element below stays scoped to it regardless of what any ancestor is
+   doing. .spatialWrap (page.tsx) is a framer-motion motion.div, which
+   keeps a persistent inline `transform` once its entrance settles — that
+   creates a stacking context of its own one level up, and a plain
+   `position:relative` .wrap has no context of its own to shield a
+   negative z-index child from landing behind an ancestor's opaque
+   background instead of just behind the canvas. Confirmed live: without
+   this, the glow below was visible mid-entrance and silently vanished
+   once the motion.div's transform settled — the same class of bug
+   PageToc's position:fixed hit earlier in this codebase, different
+   property. */
 .wrap {
   position: relative;
+  z-index: 0;
   width: 100%;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* At the larger size (see page.module.css), the object was still reading
+   as a cluster of dots sitting in flat black — no sense of it actually
+   occupying or emitting into the space around it. A soft, purely-CSS
+   radial glow (the same --term-accent-glow token the node color already
+   implies, theme-aware for free) roots it in the chamber instead of
+   leaving it floating. No z-index needed on the pseudo itself — paint
+   order alone (::before always precedes the canvas element within the
+   same stacking context) keeps it behind, now that .wrap actually has a
+   stacking context of its own for that ordering to apply within. */
+.wrap::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: radial-gradient(circle, var(--term-accent-glow) 0%, transparent 68%);
+  /* `--glow-energy` is written every frame in SpatialObject.tsx from the
+     same `energy` value that already brightens the wireframe's own edges
+     and nodes (a real system value — kicked by pointer proximity and the
+     boot-ready handoff, decaying otherwise — not a separate decorative
+     animation on top of it). Falls back to a fixed 0.4 so the glow still
+     has a sensible base level before JS's first frame, and stays exactly
+     that under reduced motion (the rAF loop that would update it never
+     runs there). */
+  /* No CSS transition here — `energy` is already a per-frame exponential
+     damp() in the tick loop below, so a second smoothing layer on top
+     would just add lag against an already-smooth value. */
+  opacity: calc(0.32 + var(--glow-energy, 0.1) * 0.5);
+  pointer-events: none;
 }
 
 .canvas {

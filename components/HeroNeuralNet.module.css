@@ -1,0 +1,74 @@
+.panel {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .panel {
+    display: block;
+    position: absolute;
+    /* Left column, alongside CoreLog/HeroVectorSpace — see
+       HeroVectorSpace.module.css's comment: PageToc already owns the
+       right margin as a fixed, viewport-centered panel, and this
+       collided with it live at the top of the page before moving here. */
+    left: clamp(20px, 5vw, 72px);
+    /* Fixed offset from .chamber's top, same reasoning as CoreLog/
+       HeroVectorSpace — placed a full panel-height-plus-gap below
+       HeroVectorSpace so the three stack as one column, not
+       percentage-based against .chamber's much taller full box. */
+    top: 500px;
+    z-index: 1;
+    width: 150px;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--term-fg-dim);
+}
+
+.note {
+  font-size: 0.56rem;
+  font-style: italic;
+  color: var(--term-muted);
+}
+
+.diagram {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.link {
+  stroke: var(--term-border);
+  stroke-width: 0.4;
+}
+
+.node {
+  fill: var(--term-bg);
+  stroke: var(--term-fg-dim);
+  stroke-width: 0.8;
+}
+
+.signal {
+  fill: var(--term-mint);
+  filter: drop-shadow(0 0 2px var(--term-mint));
+}
+
+.caption {
+  margin: 6px 0 0;
+  font-size: 0.54rem;
+  font-style: italic;
+  color: var(--term-muted);
+  line-height: 1.4;
+}

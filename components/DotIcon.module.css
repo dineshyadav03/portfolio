@@ -15,3 +15,28 @@
   border-radius: 50%;
   background: transparent;
 }
+
+/* Opt-in idle flicker (see DotIcon.tsx's `flicker` prop) — DotIcon.tsx
+   picks roughly 1 in 15 lit dots and gives each its own
+   --flicker-duration/--flicker-delay, so flickers read as scattered
+   across the mark rather than one synchronized pulse. A brief dip, not a
+   full blink-off — reads as a live signal display, not a fault. Gated
+   here (not just by the `flicker` prop) so reduced-motion users never
+   get the animation regardless of what a caller passes. */
+@media (prefers-reduced-motion: no-preference) {
+  .dotFlicker {
+    animation: dotFlicker var(--flicker-duration, 7s) ease-in-out infinite;
+    animation-delay: var(--flicker-delay, 0s);
+  }
+}
+
+@keyframes dotFlicker {
+  0%,
+  92%,
+  100% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 0.3;
+  }
+}

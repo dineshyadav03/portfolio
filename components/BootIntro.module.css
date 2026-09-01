@@ -39,6 +39,7 @@
 }
 
 .titlebar {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -51,6 +52,56 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--term-muted);
+}
+
+.titleRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* A real percentage — elapsed time over the boot sequence's own actual
+   duration, not a fabricated loading number (see BootIntro.tsx). Tabular
+   figures so the digit width doesn't jitter the corner icon beside it as
+   the value counts up. */
+.percentText {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  /* --term-fg (not --term-muted) — matches the site's one other real
+     percentage readout (BuildStatusPanel's "N% complete"), which uses
+     full foreground brightness specifically because a muted percentage is
+     hard to actually read at a glance. This is now the secondary,
+     titlebar-corner readout; the large, hard-to-miss version lives below
+     the frame (see BootIntro.tsx) after user feedback that the
+     titlebar-only version went unnoticed entirely. */
+  color: var(--term-fg);
+  transition: color 0.3s var(--ease-standard);
+}
+
+/* The one moment it actually completes — reached only once, right as the
+   overlay is about to clear (see BootIntro.tsx's rAF loop). */
+.percentText[data-complete="true"] {
+  color: var(--term-mint);
+}
+
+/* Fills left-to-right in step with .percentText above — one shared
+   `percent` value driving both, see BootIntro.tsx. Sits inside the
+   titlebar's own bottom edge rather than adding a second border. */
+.progressTrack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 3px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--term-accent);
+  box-shadow: 0 0 6px 0 var(--term-accent-glow);
 }
 
 .scene {

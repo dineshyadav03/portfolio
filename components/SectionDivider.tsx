@@ -34,13 +34,16 @@ const rule: Variants = {
 // carries `whileInView`; the sweep is driven by `entered` state set inside
 // that single `onViewportEnter`, so there is exactly one trigger and two
 // coordinated responses, not two triggers that happen to agree.
-export default function SectionDivider({ label }: { label: string }) {
+export default function SectionDivider({ label, id }: { label: string; id?: string }) {
   const reduced = useReducedMotion();
   const [entered, setEntered] = useState(false);
   const [sweepDuration, setSweepDuration] = useState(0.6);
 
   return (
-    <div className={styles.divider}>
+    // `id`, when given, is a real jump target — see components/PageToc.tsx,
+    // which links to these same section codes rather than inventing its
+    // own labels.
+    <div className={styles.divider} id={id}>
       <h2 className={styles.label}>{label}</h2>
       <span className={styles.track}>
         <motion.span

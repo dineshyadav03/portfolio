@@ -19,11 +19,25 @@ export default function MaskedText({
   className,
   delay = 0,
   stagger = 0.055,
+  start = true,
+  skipEntrance = false,
 }: {
   text: string;
   className?: string;
   delay?: number;
   stagger?: number;
+  /** Pass 24: gates the reveal on a real event instead of mount time. Stays
+   *  false to hold every word masked/hidden (not merely "not yet
+   *  scheduled") until the caller flips it — see app/page.tsx, where this
+   *  is tied to the real boot-ready handoff rather than a guessed delay. */
+  start?: boolean;
+  /** Pass 24: for an instance that mounts into an already-`start`-ed world
+   *  (a route remount after the real reveal already happened once — see
+   *  the long comment in lib/systemStatus.ts) — skips the mask animation
+   *  entirely rather than replaying it, matching every other gated hero
+   *  element's `initial={false}` treatment in app/page.tsx. Must be a
+   *  value frozen at this instance's own mount, not a live boolean. */
+  skipEntrance?: boolean;
 }) {
   const reduced = useReducedMotion();
   const words = text.split(" ");
@@ -39,9 +53,9 @@ export default function MaskedText({
           <span style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top" }}>
             <motion.span
               style={{ display: "inline-block" }}
-              initial={{ y: "110%" }}
-              animate={{ y: "0%" }}
-              transition={{ duration: 0.62, ease: EASE, delay: delay + i * stagger }}
+              initial={skipEntrance ? false : { y: "110%" }}
+              animate={start ? { y: "0%" } : { y: "110%" }}
+              transition={{ duration: 0.62, ease: EASE, delay: start ? delay + i * stagger : 0 }}
             >
               {word}
             </motion.span>

@@ -25,8 +25,15 @@ const FORMATTERS = clocks.map(
 
 export default function TerminalWindow({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const section = nav.find((item) => item.href === pathname);
-  const title = `visitor@${profile.handle}: ~${section && section.href !== "/" ? section.href : ""}`;
+  // Pass 26: a project's own page (/creations/[slug]) still belongs to
+  // "work" for the kicker's sake (matches the same prefix-match fix in
+  // Nav.tsx) — but the titlebar itself shows the real, literal path (like
+  // an actual shell prompt would: `~/creations/cody`, not just
+  // `~/creations`), not the parent section's href.
+  const section = nav.find((item) =>
+    item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`),
+  );
+  const title = `visitor@${profile.handle}: ~${pathname !== "/" ? pathname : ""}`;
   const delaySec = useBootRevealDelay();
   const reduced = useReducedMotion();
   const [now, setNow] = useState<Date | null>(null);

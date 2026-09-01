@@ -1,0 +1,18 @@
+.signal {
+  position: relative;
+  height: 1em;
+  margin: 0 0 14px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--term-mint);
+  text-align: center;
+}
+
+.signal span {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}

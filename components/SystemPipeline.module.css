@@ -87,6 +87,22 @@
   box-shadow: 0 0 6px 1px rgba(188, 214, 173, 0.6);
 }
 
+/* The continuous, scroll-driven twin of .packet above — same size/color
+   language (it's the same "data moving through the pipe" idea), but its
+   position is a live scroll readout instead of a one-shot reveal
+   animation, so it keeps tracking the visitor for the rest of the visit
+   rather than only playing once when the section first enters view. */
+.flowDot {
+  position: absolute;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--term-mint);
+  box-shadow: 0 0 7px 1.5px rgba(188, 214, 173, 0.75);
+}
+
 .stageBody {
   padding-bottom: 22px;
   min-width: 0;

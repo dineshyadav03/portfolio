@@ -6,7 +6,8 @@ import { ICOSAHEDRON_EDGES, ICOSAHEDRON_VERTICES, project, rotate, type Vec3 } f
 import { createRng } from "@/lib/deterministicRandom";
 import { clamp, damp, distance, smoothstep } from "@/lib/physics";
 import { getScrollVelocity } from "@/lib/scrollVelocity";
-import { onSystemStatusChange } from "@/lib/systemStatus";
+import { setSpatialEnergy } from "@/lib/spatialEnergy";
+import { hasSystemEverBeenReady, onSystemStatusChange } from "@/lib/systemStatus";
 import { onThemeChange } from "@/lib/theme";
 import styles from "./SpatialObject.module.css";
 
@@ -281,30 +282,35 @@ export default function SpatialObject({
       });
 
       // --- primary edges ---
-      ctx.lineWidth = 1;
+      // Pass 26: base weight bumped from 1 to 1.3 — a straight increase to
+      // .spatialWrap's rendered size (see page.module.css) would otherwise
+      // just spread this same 1px thinness further apart, reading as more
+      // empty space rather than more presence. This keeps the geometry
+      // feeling solid at the new, larger scale instead of diluted by it.
+      ctx.lineWidth = 1.3;
       for (const [a, b] of ICOSAHEDRON_EDGES) {
         const pa = projected[a];
         const pb = projected[b];
         const t = (norm(pa.depth) + norm(pb.depth)) / 2;
         const prox = Math.max(proximity[a], proximity[b]);
         ctx.strokeStyle = line;
-        ctx.lineWidth = 1 + prox * 0.8;
+        ctx.lineWidth = 1.3 + prox * 0.9;
         // Canvas silently ignores an out-of-range globalAlpha (leaving the
         // previous frame's value in place) rather than clamping it, so the
         // energy boost has to be clamped explicitly here.
-        ctx.globalAlpha = clamp((0.18 + t * 0.42 + prox * 0.3) * globalFade * (1 + energy * ENERGY_BRIGHTNESS), 0, 1);
+        ctx.globalAlpha = clamp((0.22 + t * 0.44 + prox * 0.3) * globalFade * (1 + energy * ENERGY_BRIGHTNESS), 0, 1);
         ctx.beginPath();
         ctx.moveTo(cx + pa.x, cy + pa.y);
         ctx.lineTo(cx + pb.x, cy + pb.y);
         ctx.stroke();
       }
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.3;
 
       // --- primary nodes ---
       projected.forEach((p, i) => {
         const t = norm(p.depth);
         const prox = proximity[i];
-        const r = (2 + t * 2.2) * (1 + prox * 0.7);
+        const r = (2.5 + t * 2.6) * (1 + prox * 0.7);
         ctx.beginPath();
         ctx.fillStyle = t > 0.55 || prox > 0.5 ? node : dim;
         ctx.globalAlpha = clamp((0.55 + t * 0.45 + prox * 0.4) * globalFade * (1 + energy * ENERGY_BRIGHTNESS), 0, 1);
@@ -391,11 +397,54 @@ export default function SpatialObject({
     });
     io.observe(wrap);
 
+    // Pass 24: the lattice previously started resolving (introT/
+    // secondaryIntroT) the instant this component mounted — which, on a
+    // true first load, is the instant the page mounts *behind* BootIntro's
+    // still-fully-opaque overlay. INTRO_MS is 650ms; BootIntro stays
+    // visible for ~5.5s. The entire "construction" sequence was finishing
+    // silently, unseen, roughly 5 seconds before the overlay ever cleared
+    // — so the first thing a visitor actually saw was the object already
+    // fully resolved and idly rotating, with no visible entrance at all.
+    //
+    // `gateOpen` delays capturing `start` (and therefore every time-based
+    // value derived from it: introT, secondaryIntroT, rotation angle,
+    // ambient signal packets) until the real BOOT → READY handoff — the
+    // same event that already kicks energy below. On a true first load
+    // that's whenever BootIntro's overlay actually clears; on a route
+    // return, `getSystemStatus()` is already "ready" (or about to be, via
+    // the short navigating→ready window PageTransition drives — see
+    // lib/systemStatus.ts's `useIsSystemReady`), so the gate opens
+    // essentially immediately rather than replaying a multi-second wait.
+    // No new rAF loop, no new state — this rides the loop that already
+    // exists, just changes *when* it starts actually drawing.
+    // `hasSystemEverBeenReady()` (not a raw `getSystemStatus() === "ready"`
+    // check) — a route remount mid-navigation can land this effect at a
+    // moment where the live status has briefly reverted to "navigating"
+    // even though the system already reached ready once; see the long
+    // comment in lib/systemStatus.ts for how this was diagnosed live.
+    let gateOpen = hasSystemEverBeenReady();
+    // True only when the gate was ALREADY open at setup (a remount after
+    // the real construction already played out once) — not when it opens
+    // later via the live "ready" event below, which is a true first
+    // construction and should still play in full. Without this, a
+    // remounted canvas would replay its own 650ms "geometry resolving"
+    // fade every time, even though the outer wrapper (app/page.tsx,
+    // `initial={false}` when `wasReadyAtMount`) correctly skips its half
+    // of the same moment — a mismatched "wrapper already visible, content
+    // still fading in" result.
+    const skipConstructionAnim = gateOpen;
+
     // The BOOT → READY handoff (lib/systemStatus.ts, published by
     // BootIntro.tsx the instant its overlay actually clears) is a real
     // "power up" kick, not a timing constant this component duplicates.
     const unsubStatus = onSystemStatusChange((status) => {
-      if (status === "ready") kickEnergy(1);
+      if (status === "ready") {
+        kickEnergy(1);
+        if (!gateOpen) {
+          gateOpen = true;
+          start = null; // re-captured on the next tick — elapsed starts from ~0 at this exact moment
+        }
+      }
     });
 
     let raf: number | null = null;
@@ -403,8 +452,12 @@ export default function SpatialObject({
     let lastTime: number | null = null;
     function tick(time: number) {
       raf = requestAnimationFrame(tick);
-      if (!visible) return;
-      if (start === null) start = time;
+      if (!visible || !gateOpen) return;
+      // A large negative offset pushes introT/secondaryIntroT's smoothstep
+      // windows (INTRO_MS, SECONDARY_INTRO_DELAY_MS+INTRO_MS — both well
+      // under 1s) fully behind "now," so both evaluate to 1 on this very
+      // first active frame instead of rising from 0 again.
+      if (start === null) start = skipConstructionAnim ? time - 10000 : time;
       if (lastTime === null) lastTime = time;
       const dt = Math.min((time - lastTime) / 1000, 0.05); // clamp so a dropped/backgrounded frame can't cause a huge jump
       lastTime = time;
@@ -430,6 +483,14 @@ export default function SpatialObject({
       // settles all the way to 0, same as the tilt itself.
       const ambientEnergy = Math.max(Math.min(1, Math.hypot(sp.x, sp.y)), Math.min(1, Math.abs(smoothedVelocityRef.current) * 1.3));
       energyRef.current = damp(energyRef.current, ambientEnergy, ENERGY_LAMBDA, dt);
+      // Drives .wrap::before's glow opacity directly (see
+      // SpatialObject.module.css) — the same energy value that already
+      // brightens the wireframe itself, read by CSS instead of duplicated
+      // as a second animated value.
+      wrap!.style.setProperty("--glow-energy", String(energyRef.current));
+      // Published for CoreLog.tsx to read — a real, already-computed
+      // value, not a second "how active is the system" calculation.
+      setSpatialEnergy(energyRef.current);
 
       const introT = smoothstep(0, INTRO_MS, elapsedMs);
       const secondaryIntroT = smoothstep(SECONDARY_INTRO_DELAY_MS, SECONDARY_INTRO_DELAY_MS + INTRO_MS, elapsedMs);

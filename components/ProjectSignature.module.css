@@ -1,0 +1,36 @@
+/* `z-index: 0` alongside `position: relative` establishes this wrap's own
+   stacking context, so the glow pseudo-element below stays scoped to it
+   regardless of what any ancestor (a framer-motion wrapper, etc.) is
+   doing — the same fix already learned the hard way on SpatialObject and
+   GlobeContact's own glow layers this session, applied correctly here
+   from the start instead of discovered live. */
+.wrap {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border: 1px dotted var(--term-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wrap::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle, var(--term-accent-glow) 0%, transparent 60%);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    aspect-ratio: 4 / 3;
+  }
+}

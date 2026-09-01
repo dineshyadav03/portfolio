@@ -1,0 +1,29 @@
+/* `z-index: 60` — above PageTransition/TerminalWindow content (which
+   don't define their own z-index at this level) but below BootIntro's
+   overlay (200) and Mascot (50 — wait, above Mascot deliberately: this
+   is a persistent system chrome element, the same visual tier as the
+   status bar it sits opposite, not page content). Fixed to the true
+   viewport, not `.chamber` or any scrolling ancestor — mounted directly
+   in app/layout.tsx for the same reason PageToc is (see that component's
+   own containing-block comment): anything nested inside PageTransition's
+   motion.div would inherit a containing block from its persistent inline
+   transform and silently stop being viewport-relative. */
+.track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  background: var(--term-border);
+  opacity: 0.5;
+}
+
+.fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: var(--term-accent);
+  box-shadow: 0 0 6px 0 var(--term-accent-glow);
+}

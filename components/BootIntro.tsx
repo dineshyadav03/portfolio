@@ -175,6 +175,31 @@ export default function BootIntro() {
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState<"connect" | "hud" | "welcome">("connect");
   const [sweeping, setSweeping] = useState(false);
+  // A real percentage — elapsed time over the boot sequence's own actual
+  // total duration (BOOT_VISIBLE_MS, the same constant every phase
+  // transition below already uses), not a fabricated "loading assets..."
+  // number counting up on its own arbitrary timer. Reaches exactly 100%
+  // the instant the overlay is about to clear — the same "counter arrives
+  // at completion, then the system reveals" beat visible chrome (the
+  // titlebar counter, the fill bar) both read from this one value, so
+  // they can't drift out of sync with each other.
+  const [percent, setPercent] = useState(0);
+
+  useEffect(() => {
+    if (reduced) return;
+    let raf: number | null = null;
+    let start: number | null = null;
+    function tick(time: number) {
+      if (start === null) start = time;
+      const pct = Math.min(100, Math.round(((time - start) / BOOT_VISIBLE_MS) * 100));
+      setPercent((prev) => (prev === pct ? prev : pct));
+      if (pct < 100) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+    return () => {
+      if (raf !== null) cancelAnimationFrame(raf);
+    };
+  }, [reduced]);
 
   useEffect(() => {
     if (reduced) {
@@ -248,6 +273,16 @@ export default function BootIntro() {
         >
           <div className={phase === "hud" ? `${styles.frameWrap} ${styles.frameWide}` : styles.frameWrap}>
             <DottedFrame>
+              {/* Fills left-to-right in step with the titlebar's own
+                  percentage below — one `percent` value, two coordinated
+                  readouts, not two independently-timed effects. */}
+              <div className={styles.progressTrack} aria-hidden="true">
+                <motion.div
+                  className={styles.progressFill}
+                  animate={{ width: `${percent}%` }}
+                  transition={{ duration: 0.15, ease: "linear" }}
+                />
+              </div>
               {phase === "connect" && (
                 <motion.div
                   className={styles.scanline}
@@ -270,7 +305,12 @@ export default function BootIntro() {
                       ? "systems online"
                       : "welcome"}
                 </span>
-                <DotIcon bitmap={CORNER_ICON} label="" dot={3} gap={2} />
+                <span className={styles.titleRight}>
+                  <span className={styles.percentText} data-complete={percent >= 100 || undefined} aria-hidden="true">
+                    {percent}%
+                  </span>
+                  <DotIcon bitmap={CORNER_ICON} label="" dot={3} gap={2} />
+                </span>
               </motion.div>
 
               <AnimatePresence mode="wait">
@@ -344,7 +384,25 @@ export default function BootIntro() {
               </AnimatePresence>
             </DottedFrame>
           </div>
-          {phase === "welcome" && (
+          {/* The percentage previously lived only in the titlebar corner —
+              real, correctly wired, but competing for attention with a
+              busy animated scene (connection handshake, then a full
+              dashboard) is exactly why it went unnoticed. This is the same
+              large, unmissable slot WELCOME_TEXT already uses below the
+              frame — the percentage owns it first, then hands off to the
+              welcome message once it actually reaches 100%, instead of
+              existing off to the side the whole time. */}
+          {phase !== "welcome" ? (
+            <motion.div
+              className={styles.welcomeBig}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              aria-hidden="true"
+            >
+              <span className={styles.welcomeBigText}>{percent}%</span>
+            </motion.div>
+          ) : (
             <motion.div
               className={styles.welcomeBig}
               initial={{ opacity: 0, y: 8 }}

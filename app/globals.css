@@ -10,6 +10,23 @@
   --term-mint: #bcd6ad;
   --term-selection: #ff5a2e;
   --page-bg: #000000;
+  /* Pass 27: reverted to pure black on explicit request — Pass 23's
+     #141414 (below) was a deliberate attempt to give the chamber contrast
+     against --page-bg, but in practice that read as a visible grey box
+     sitting on top of the page rather than a "distinct region," which is
+     the opposite of this site's established flattened, no-boxed-card
+     ethos (TerminalWindow itself was flattened for the same reason — see
+     [[project-portfolio-overview]]). The chamber still reads as its own
+     region via the dotted border-bottom rule (app/page.module.css)
+     without needing a background delta at all. Kept equal to --page-bg
+     rather than removing the token, since GlobeContact and other
+     components may still want a named "panel" concept later.
+     Pass 23's original reasoning, for reference: a reuse of
+     --term-titlebar (#0a0a0a, shared by six other thin-strip UI elements)
+     was only a 4% raw delta from --page-bg — under dark-luminance
+     perceptual contrast (Weber's law), effectively invisible. #141414
+     fixed that gap but overshot into looking like a separate panel. */
+  --chamber-bg: #000000;
   /* The one entrance/reveal easing curve used across the whole site —
      see lib/motion.ts's `EASE`/`EASE_CSS` for the framer-motion side of
      the same curve. Module CSS transitions should reference this instead
@@ -33,6 +50,9 @@
   --term-mint: #3f6b30;
   --term-selection: #d9490f;
   --page-bg: #f5f1e8;
+  /* Light theme's --term-titlebar (#ece3d0) already reads clearly against
+     --page-bg (#f5f1e8) — confirmed live, no change needed here. */
+  --chamber-bg: #ece3d0;
 }
 
 * {

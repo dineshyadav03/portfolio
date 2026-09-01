@@ -1,0 +1,87 @@
+.wrap {
+  position: relative;
+  /* Establishes .wrap's own stacking context so the glow below stays
+     scoped to it — see the long comment on SpatialObject.module.css's
+     .wrap for why `position: relative` alone isn't sufficient here. */
+  z-index: 0;
+  width: min(280px, 70vw);
+  aspect-ratio: 1 / 1;
+  margin: 8px 0 24px;
+  cursor: grab;
+  touch-action: none;
+}
+
+/* Same ambient-glow treatment as the hero's SpatialObject — a soft,
+   theme-aware radial glow rooting the globe in the page instead of
+   leaving it as flat dots on flat black. Kept behind the canvas purely
+   by paint order (::before precedes the canvas element), no z-index
+   needed on the pseudo itself now that .wrap has a real stacking context. */
+.wrap::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(circle, var(--term-accent-glow) 0%, transparent 65%);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.wrap:active {
+  cursor: grabbing;
+}
+
+.wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 24px;
+  padding: 6px 12px;
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  background: none;
+  color: var(--term-muted);
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s var(--ease-standard), border-color 0.15s var(--ease-standard);
+}
+
+.toggle:hover {
+  color: var(--term-accent);
+  border-color: var(--term-accent);
+}
+
+.toggle:focus-visible {
+  outline: 1px solid var(--term-accent);
+  outline-offset: 2px;
+}
+
+/* Flush-left worked fine at mobile width, where the globe already
+   occupies most of the column's width (70vw) and there's nowhere
+   meaningful to center it against. Past that, the column has real free
+   width beside it, and a fixed 280px globe pinned to the left edge reads
+   as adrift rather than composed — confirmed live at 1600px, where it
+   left several hundred px of dead space to its right. The toggle button
+   is switched to a block-level flex box specifically so `margin: auto`
+   can center it too — inline-flex (its base, kept for mobile) doesn't
+   respond to auto margins the way a block box does. */
+@media (min-width: 640px) {
+  .wrap {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .toggle {
+    display: flex;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

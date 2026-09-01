@@ -9,10 +9,13 @@ import StatusBar from "@/components/StatusBar";
 import KeyboardNav from "@/components/KeyboardNav";
 import TerminalWindow from "@/components/TerminalWindow";
 import PageTransition from "@/components/PageTransition";
+import PageToc from "@/components/PageToc";
+import ScrollProgress from "@/components/ScrollProgress";
 import BootIntro from "@/components/BootIntro";
 import Mascot from "@/components/Mascot";
 import ScrollHint from "@/components/ScrollHint";
 import SmoothScroll from "@/components/SmoothScroll";
+import SystemField from "@/components/SystemField";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const mono = Geist_Mono({
@@ -76,9 +79,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a href="#main" className="skipLink">
           Skip to content
         </a>
+        {/* Behind everything, including .grain — the ambient sitewide dot
+            field (see components/SystemField.tsx). */}
+        <SystemField />
         <div className="grain" aria-hidden="true" />
         <KeyboardNav />
         <SmoothScroll />
+        {/* `position: fixed`, homepage-only (checked internally via
+            usePathname — see components/PageToc.tsx). Mounted here,
+            outside TerminalWindow/PageTransition, deliberately: their own
+            motion.div wrappers carry animated transforms, which make an
+            element "fixed" relative to that box instead of the real
+            viewport — confirmed live, this silently breaks otherwise. */}
+        <PageToc />
+        {/* Same containing-block reasoning as PageToc above — mounted
+            outside TerminalWindow/PageTransition so `position: fixed`
+            stays genuinely viewport-relative. Site-wide (every route),
+            unlike PageToc which is homepage-only. */}
+        <ScrollProgress />
         <MotionConfig reducedMotion="user">
           <BootIntro />
           <Mascot />

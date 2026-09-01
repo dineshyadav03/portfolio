@@ -1,14 +1,22 @@
+/* Pass 28: gained a real top boundary (the same dotted-rule language
+   SectionDivider uses throughout the rest of the page) — previously
+   this just sat directly under the page's last content with only
+   padding separating it, so "this is the footer, a distinct system
+   chrome zone" was implied by position alone rather than actually
+   drawn. */
 .bar {
   width: 100%;
   max-width: 900px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px dotted var(--term-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 4px 0;
   font-size: 0.72rem;
   color: var(--term-fg-dim);
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 10px 6px;
 }
 
 .hints,
@@ -31,4 +39,17 @@
   border-radius: 4px;
   color: var(--term-muted);
   background: var(--term-titlebar);
+  transition: color 0.15s var(--ease-standard), border-color 0.15s var(--ease-standard);
+}
+
+/* A small, honest touch of life — these keys are real, working
+   shortcuts (KeyboardNav.tsx), so highlighting on hover reads as "this
+   does something" rather than being purely decorative chrome. */
+.hints kbd:hover {
+  color: var(--term-fg);
+  border-color: var(--term-accent);
+}
+
+.clocks {
+  font-variant-numeric: tabular-nums;
 }

@@ -90,6 +90,21 @@ function ConnectorLine({
   reduced: boolean | null;
 }) {
   const glow = useTransform(pipelineProgress, [index - 0.7, index, index + 0.7], [0.55, 1, 0.55]);
+  // A second, independent read of the same shared scroll value — not a
+  // replacement for `glow` above (that stays as the connector's own subtle
+  // brightness pulse) but a literal packet position: while `pipelineProgress`
+  // is inside this connector's own [index, index+1) span, `flowTop` tracks
+  // scroll 1:1 and `flowOpacity` keeps it visible; outside that span
+  // framer-motion clamps `flowTop` to its nearest boundary and `flowOpacity`
+  // fades it out, so exactly one dot is ever mid-travel at a time, handed
+  // off connector to connector as the visitor scrolls — the pipeline
+  // metaphor made literal, continuously, not just on first reveal.
+  const flowTop = useTransform(pipelineProgress, [index, index + 1], ["0%", "100%"]);
+  const flowOpacity = useTransform(
+    pipelineProgress,
+    [index - 0.15, index, index + 0.85, index + 1],
+    [0, 1, 1, 0],
+  );
 
   return (
     <span className={styles.connector} aria-hidden="true">
@@ -99,6 +114,7 @@ function ConnectorLine({
         style={reduced ? undefined : { opacity: glow }}
       />
       <motion.span className={styles.packet} variants={packet} />
+      {!reduced && <motion.span className={styles.flowDot} style={{ top: flowTop, opacity: flowOpacity }} />}
     </span>
   );
 }

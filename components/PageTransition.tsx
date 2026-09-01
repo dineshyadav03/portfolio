@@ -50,7 +50,13 @@ const TRANSITIONS: Record<
 
 export default function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const t = TRANSITIONS[pathname] ?? TRANSITIONS["/"];
+  // Pass 26: a project's own page (/creations/[slug]) is still part of the
+  // same "directory of live processes" space /creations itself is — it
+  // gets that same transition character rather than falling through to
+  // the generic "/" default, which would read as arriving somewhere
+  // unrelated to where the visitor actually came from.
+  const transitionKey = pathname.startsWith("/creations/") ? "/creations" : pathname;
+  const t = TRANSITIONS[transitionKey] ?? TRANSITIONS["/"];
   // The one place that actually knows a navigation happened, regardless of
   // whether it came from clicking Nav, pressing 1-4, or running `cd` in the
   // terminal (CommandLine.tsx) — all three ultimately go through the same

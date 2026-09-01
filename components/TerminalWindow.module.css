@@ -1,6 +1,18 @@
+/* Pass 23: 900px → 1080px. Measured live at 1440x900 and 1920x1000: at
+   900px the window occupied well under half the screen width on both real
+   desktop sizes, with a flat, featureless void on either side in both
+   themes — not "restrained negative space" so much as the layout simply
+   not accounting for the viewport it was rendering into. Prose elements
+   throughout the site already cap their own measure independently
+   (itemDesc/role/bioLine all set their own max-width in ch units), so
+   widening this shared frame doesn't blow out line length anywhere — it
+   only gives grid/spatial layouts (Creations, CapabilitySystem,
+   SystemPipeline) more room and reduces the void. Only affects viewports
+   wider than the old cap; every breakpoint at or below 900px is
+   unchanged. */
 .window {
   width: 100%;
-  max-width: 900px;
+  max-width: 1080px;
 }
 
 .titlebar {

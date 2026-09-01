@@ -1,0 +1,74 @@
+/* Relocated on direct request from an overlay on the object itself to a
+   real margin panel beside it — anchored to .chamber (page.module.css,
+   `position: relative`), not .spatialWrap, since it now needs to sit in
+   space the object's own small box doesn't cover. Wide-viewport only: at
+   ~1080px and narrower the object/text column already claims most of the
+   chamber's width (see SpatialObject's own vw-driven sizing), so there's
+   no real margin left for a side panel to occupy without overlapping
+   content — same reasoning PageToc already applies to its own
+   wide-viewport-only gate. */
+.log {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .log {
+    display: flex;
+    position: absolute;
+    left: clamp(20px, 5vw, 72px);
+    /* A fixed offset from .chamber's own top edge, not a percentage of
+       its height — .chamber's min-height:74vh spans the whole hero
+       (object + wordmark + text), so a percentage-based `top` centers
+       against that full box instead of against where the object itself
+       actually sits. Confirmed live: the object's own measured top
+       lands ~200px below .chamber's top edge (56px padding + a bit of
+       flex-centered slack) across typical desktop viewports, so this
+       tracks it closely enough for a HUD panel without needing to
+       measure the object's real position in JS. */
+    top: 230px;
+    z-index: 1;
+    flex-direction: column;
+    gap: 1px;
+    pointer-events: none;
+    animation: logFadeIn 0.4s var(--ease-standard) both;
+    animation-delay: 0.45s;
+  }
+}
+
+.log[data-skip-entrance] {
+  animation: none;
+}
+
+@keyframes logFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.line {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+  font-size: 0.62rem;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.label {
+  color: var(--term-muted);
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--term-fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.spinner {
+  color: var(--term-mint);
+  width: 1ch;
+}

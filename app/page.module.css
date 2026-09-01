@@ -8,7 +8,15 @@
    larger and more detailed, not just re-timed. */
 /* Pass 19: a genuinely distinct spatial register for the hero, not a
    bigger version of the same 900px column every other section uses. See
-   the JSX comment in page.tsx for the full reasoning. */
+   the JSX comment in page.tsx for the full reasoning.
+   Pass 23: background switched from --term-titlebar to the dedicated
+   --chamber-bg (see globals.css) — the shared title-bar token never had
+   enough contrast against --page-bg in dark theme to actually read as a
+   distinct panel; this was invisible on every real dark-theme visit until
+   now. Verified live in both themes.
+   Pass 27: --chamber-bg reverted to pure black on explicit request — see
+   globals.css. The chamber still reads as a distinct region via the
+   dotted border-bottom below, without needing a background delta at all. */
 .chamber {
   position: relative;
   width: 100vw;
@@ -19,13 +27,23 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: var(--term-titlebar);
+  background: var(--chamber-bg);
   border-bottom: 1px dotted var(--term-border);
   margin-bottom: 24px;
 }
 
+/* Pass 26: 280px was a flat cap regardless of how much real chamber width
+   was available — on anything wider than ~1050px (the 58vw crossover),
+   the object stayed pinned at 280px no matter how much emptier the
+   chamber around it got, which is most real desktop traffic. Switched to
+   a vw-driven target with a higher ceiling so it actually grows with the
+   room it has, instead of reading as a fixed-size icon adrift in
+   whatever space the viewport happens to leave around it. The draw
+   routine's own line/node weights were bumped alongside this (see
+   SpatialObject.tsx) so the geometry gains real visual weight at the
+   larger size instead of just spreading its existing thinness out. */
 .spatialWrap {
-  width: min(280px, 58vw);
+  width: min(380px, 34vw);
   margin: 0 auto 22px;
 }
 
@@ -164,6 +182,6 @@
   }
 
   .spatialWrap {
-    width: min(220px, 52vw);
+    width: min(240px, 56vw);
   }
 }

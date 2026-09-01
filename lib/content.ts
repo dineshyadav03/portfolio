@@ -173,6 +173,20 @@ export const projects: Project[] = [
   },
 ];
 
+// Deterministic, derived from the project's own name rather than stored as
+// a separate field — one source of truth, no risk of a slug drifting out
+// of sync with the name it's supposed to identify.
+export function projectSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function projectBySlug(slug: string): Project | undefined {
+  return projects.find((p) => projectSlug(p.name) === slug);
+}
+
 export type Post = {
   title: string;
   date: string; // ISO date, e.g. "2026-08-28"

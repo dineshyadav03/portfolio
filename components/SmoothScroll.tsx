@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import Lenis from "lenis";
+import { setLenisInstance } from "@/lib/lenisInstance";
 import { setScrollVelocity } from "@/lib/scrollVelocity";
 
 // Modern Lenis (v1+) is architecturally different from the smooth-scroll
@@ -47,6 +48,7 @@ export default function SmoothScroll() {
       touchMultiplier: 1,
     });
     lenisRef.current = lenis;
+    setLenisInstance(lenis);
     // Pass 20: Lenis already computes a real velocity every tick — this
     // just publishes it to the shared store above instead of it going
     // unused. Reset to 0 on unmount/reduced-motion so a stale value can't
@@ -67,6 +69,7 @@ export default function SmoothScroll() {
       cancelAnimationFrame(raf);
       lenis.destroy();
       lenisRef.current = null;
+      setLenisInstance(null);
       setScrollVelocity(0);
     };
   }, [reduced]);

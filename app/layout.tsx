@@ -5,6 +5,7 @@ import { MotionConfig } from "framer-motion";
 import "./globals.css";
 import styles from "./layout.module.css";
 import { profile } from "@/lib/content";
+import BackToTop from "@/components/BackToTop";
 import StatusBar from "@/components/StatusBar";
 import KeyboardNav from "@/components/KeyboardNav";
 import TerminalWindow from "@/components/TerminalWindow";
@@ -107,6 +108,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             stays genuinely viewport-relative. Site-wide (every route),
             unlike PageToc which is homepage-only. */}
         <ScrollProgress />
+        {/* Same containing-block reasoning as PageToc/ScrollProgress above.
+            Site-wide, every viewport width — unlike PageToc, any route can
+            get long enough to want a way back to the top, not just the
+            homepage's wide-viewport case. */}
+        <BackToTop />
         <MotionConfig reducedMotion="user">
           <BootIntro />
           <Mascot />

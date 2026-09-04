@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useMotionValue, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import AsciiPortrait from "@/components/AsciiPortrait";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import BuildStatusPanel from "@/components/BuildStatusPanel";
@@ -31,7 +31,9 @@ import styles from "./page.module.css";
 const WORDMARK = textToDotBitmap(profile.name);
 
 export default function Home() {
-  const heroRef = useRef<HTMLDivElement>(null);
+  const chamberRef = useRef<HTMLDivElement>(null);
+  const sceneCoreRef = useRef<HTMLDivElement>(null);
+  const sceneIdentityRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   // Pass 24: the hero previously animated in on its own mount timer,
   // completely independent of the boot sequence — its entire entrance
@@ -55,56 +57,110 @@ export default function Home() {
   // entirely for an instance that mounted into an already-settled world,
   // instead of replaying it a second time.
   const [wasReadyAtMount] = useState(ready);
-  // Tracks scroll progress across the hero's own height: 0 while it's still
-  // pinned at the top of the viewport, 1 once it's fully scrolled past —
-  // i.e. "how far away from the hero has the visitor scrolled," not the
-  // page's total scroll. Purely a derived MotionValue (no React state), the
-  // same mechanism ParallaxItem already uses for the portrait's entry drift.
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
+  // Pass 31: a genuine pinned scroll sequence, on explicit request — the
+  // hero previously just sat in normal document flow (object, wordmark,
+  // portrait, and text all visible together, with a subtle exit drift as
+  // you scrolled past). Now `.chamber` is a tall scroll runway
+  // (page.module.css) with `.pinStage` held via `position: sticky` while
+  // the visitor scrolls through it; `pinProgress` (0 at the top of that
+  // runway, 1 at the bottom) drives the actual handoff below: the core
+  // fades/shrinks away, then the portrait + identity text rise in to
+  // replace it, in the SAME pinned viewport space rather than one simply
+  // scrolling past the other.
+  const { scrollYProgress: pinProgress } = useScroll({
+    target: chamberRef,
+    offset: ["start start", "end end"],
   });
-  // Pass 17: strengthened from -18/0.7 — the previous magnitudes were
-  // subtle enough that leaving the hero barely registered as a change of
-  // state. This should read as a real compositional shift, not a drift.
-  const portraitExitY = useTransform(heroProgress, [0, 1], [0, -32]);
-  // Pass 25: the portrait previously only drifted (y) on exit — no scale
-  // channel, unlike SpatialObject, which already shrinks via its own
-  // internal `recede`-driven scale as heroProgress rises. That meant the
-  // object visibly contracted on exit while the portrait beside it just
-  // slid, not a coordinated "the whole system is compressing together"
-  // exit. Same heroProgress input, same real event (scrolling the hero
-  // away), no new listener — just a second transform channel (scale,
-  // which the portrait never had) composing alongside the existing y and
-  // opacity ones rather than fighting them. Magnitude matched to
-  // SpatialObject's own recede shrink (~0.78 at full recede) so the two
-  // read as one system settling, not two independently-tuned effects.
-  const portraitExitScale = useTransform(heroProgress, [0, 1], [1, 0.86]);
-  const introOpacity = useTransform(heroProgress, [0, 1], [1, 0.5]);
-  // The wordmark previously sat completely inert once its entrance
-  // finished — the object and portrait receded together as the visitor
-  // scrolled past the hero, but the wordmark just stayed put, so the hero
-  // read as two things that respond to scroll and one that doesn't rather
-  // than one composition compressing as a whole. Same heroProgress input,
-  // same kind of subtle drift/fade the portrait already uses.
-  const wordmarkExitY = useTransform(heroProgress, [0, 1], [0, -24]);
-  const wordmarkExitOpacity = useTransform(heroProgress, [0, 1], [1, 0.35]);
-  // One semantic scroll milestone — the hero fully receding past the
-  // viewport — gets a single confirmation tone the first time it's
-  // crossed. Subscribed directly via heroProgress.on() (not the
-  // useMotionValueEvent hook) so the listener can unsubscribe itself the
-  // instant it fires: that makes "only once" structural rather than a
-  // guard a fast-firing scroll stream has to keep respecting on every
-  // subsequent "change" event.
+  // Scene A (the core: object, HUD panels, wordmark, whoami) — fully
+  // present through the first third of the runway, then fades and
+  // contracts, same "receding" language SpatialObject's own recede-driven
+  // scale already used for the old exit drift, just now driving the
+  // whole scene instead of one element.
+  const coreOpacity = useTransform(pinProgress, [0, 0.32, 0.48], [1, 1, 0]);
+  const coreScale = useTransform(pinProgress, [0.3, 0.48], [1, 0.88]);
+  // Scene B (portrait + identity) — starts rising in right as the core
+  // finishes fading (a deliberate small overlap, not a gap), fully
+  // settled well before the runway ends so there's real held time to
+  // actually read the identity text before normal scroll resumes.
+  const identityOpacity = useTransform(pinProgress, [0.42, 0.62], [0, 1]);
+  const identityY = useTransform(pinProgress, [0.42, 0.62], [36, 0]);
+  // AsciiPortrait's own pointer-tilt depth effect still wants a 0→1
+  // "how far past the reveal are we" input (see AsciiPortrait.tsx) — fed
+  // from the second half of the runway (after the portrait is already
+  // visible) rather than the old separate heroRef-based tracker, which
+  // this pin sequence now fully supersedes. Reduced motion never reads
+  // this (AsciiPortrait's own pointer effect is skipped entirely there),
+  // so a static MotionValue is a safe, valid stand-in for the hook rules'
+  // sake rather than branching which hook gets called.
+  const portraitDepthProgress = useTransform(pinProgress, [0.5, 1], [0, 1]);
+  const staticProgress = useMotionValue(0);
+  // A discrete "has scene B actually revealed yet" boolean, derived from
+  // the same continuous pinProgress — drives the identity text's existing
+  // listContainer/listItem stagger (a threshold-triggered reveal) without
+  // that stagger fighting the continuous scroll-scrubbed opacity/y above,
+  // which live on the outer .sceneIdentity wrapper instead — two
+  // different mechanisms on two different elements, not one property with
+  // two writers.
+  const [sceneBRevealed, setSceneBRevealed] = useState(false);
   useEffect(() => {
-    const unsubscribe = heroProgress.on("change", (latest) => {
+    if (reduced) return;
+    return pinProgress.on("change", (v) => setSceneBRevealed(v > 0.42));
+  }, [pinProgress, reduced]);
+  // Diagnostic finding (Pass 32): framer-motion's own `style={{ opacity,
+  // scale/y }}` binding on these two scene wrappers would silently stop
+  // writing to the DOM partway through the runway (confirmed live: the
+  // underlying MotionValues kept computing the correct, monotonic 0→1
+  // progress the whole time — read directly via `.get()` — while the
+  // element's actual inline `opacity`/`transform` froze and, past a point,
+  // reverted to the scene's opening value, leaving the core visible where
+  // it should have faded and the identity scene invisible where it should
+  // have been fully shown). Reproduced identically in a production build,
+  // so not a dev-mode/Strict-Mode artifact. Root cause not fully isolated
+  // (didn't track to the sceneBRevealed re-render, nor to coreScale's own
+  // clamp point), so rather than depend on framer-motion's own DOM-write
+  // scheduling for this specific chain, both scenes are now driven by a
+  // plain, direct subscription writing straight to the DOM via refs below
+  // — the exact mechanism that stayed correct through every diagnostic
+  // sample this pass.
+  useEffect(() => {
+    if (reduced) return;
+    const applyCore = () => {
+      const el = sceneCoreRef.current;
+      if (!el) return;
+      el.style.opacity = String(coreOpacity.get());
+      el.style.transform = `scale(${coreScale.get()})`;
+    };
+    const applyIdentity = () => {
+      const el = sceneIdentityRef.current;
+      if (!el) return;
+      el.style.opacity = String(identityOpacity.get());
+      el.style.transform = `translateY(${identityY.get()}px)`;
+    };
+    applyCore();
+    applyIdentity();
+    const unsubs = [
+      coreOpacity.on("change", applyCore),
+      coreScale.on("change", applyCore),
+      identityOpacity.on("change", applyIdentity),
+      identityY.on("change", applyIdentity),
+    ];
+    return () => unsubs.forEach((unsub) => unsub());
+  }, [reduced, coreOpacity, coreScale, identityOpacity, identityY]);
+  // One semantic scroll milestone — the pin sequence essentially
+  // finished, about to hand off to normal scroll — gets a single
+  // confirmation tone the first time it's crossed. Subscribed directly
+  // via pinProgress.on() (not the useMotionValueEvent hook) so the
+  // listener can unsubscribe itself the instant it fires.
+  useEffect(() => {
+    if (reduced) return;
+    const unsubscribe = pinProgress.on("change", (latest) => {
       if (latest >= 0.95) {
         playScrollThreshold();
         unsubscribe();
       }
     });
     return unsubscribe;
-  }, [heroProgress]);
+  }, [pinProgress, reduced]);
 
   return (
     <PageGlitch>
@@ -129,135 +185,131 @@ export default function Home() {
           same language SectionDivider already uses) frame it as a
           genuinely distinct chamber the rest of the page sits beneath, not
           a bigger version of the same container. */}
-      <div className={styles.chamber} id="toc-about">
-        {/* The site's one dedicated 3D element, and the literal first thing
-            a visitor sees — a slowly tumbling wireframe node lattice
-            standing in for "design × technology × intelligence" before any
-            text does. Tied to the hero's own scroll progress below, so
-            scrolling past the hero continues turning it rather than
-            leaving it inert. */}
-        <motion.div
-          className={styles.spatialWrap}
-          initial={wasReadyAtMount ? false : { opacity: 0, scale: 0.9 }}
-          animate={reduced || ready ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-          transition={{ duration: 0.5, ease: EASE }}
-        >
-          <SpatialObject scrollProgress={heroProgress} scrollInfluence={1.1} />
-        </motion.div>
-        {/* Three margin HUD panels, wide-viewport only (real side space
-            has to exist for these to read as deliberate placement rather
-            than clutter — see each one's own CSS gate) — a "JARVIS"
-            multi-panel frame around the object rather than one readout.
-            Left: the same real, live energy/velocity numbers as before,
-            just relocated per direct feedback. Right: two more panels
-            using the same real-data-vs-honestly-labeled-illustrative
-            split already established (ProjectSignature, the reverted
-            HeroConsole) — VECTOR SPACE plots real capability tags,
-            NEURAL NET is explicitly captioned illustrative. */}
-        <CoreLog ready={reduced || ready} skipEntrance={wasReadyAtMount} />
-        <HeroVectorSpace ready={reduced || ready} skipEntrance={wasReadyAtMount} />
-        <HeroNeuralNet ready={reduced || ready} skipEntrance={wasReadyAtMount} />
-        <CoreSignal ready={reduced || ready} skipEntrance={wasReadyAtMount} />
-        <motion.div
-          className={styles.wordmark}
-          initial={wasReadyAtMount ? false : { opacity: 0 }}
-          animate={reduced || ready ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 0.4, delay: 0.15, ease: EASE }}
-        >
-          {reduced ? (
-            <DotIcon bitmap={WORDMARK} label={profile.name} dot={3} gap={1.5} />
-          ) : (
-            <motion.div style={{ y: wordmarkExitY, opacity: wordmarkExitOpacity }}>
+      <div className={styles.chamber} id="toc-about" ref={chamberRef} data-static={reduced || undefined}>
+        <div className={styles.pinStage}>
+          {/* Scene A — the core. Fully present at rest; fades and
+              contracts as pinProgress advances, written directly via
+              sceneCoreRef in the effect above rather than a motion `style`
+              prop (see that effect's comment) — never under reduced
+              motion, where this just sits in normal flow, unfaded. */}
+          <div className={styles.sceneCore} ref={sceneCoreRef}>
+            {/* The site's one dedicated 3D element, and the literal first
+                thing a visitor sees — a slowly tumbling wireframe node
+                lattice standing in for "design × technology ×
+                intelligence" before any text does. */}
+            <motion.div
+              className={styles.spatialWrap}
+              initial={wasReadyAtMount ? false : { opacity: 0, scale: 0.9 }}
+              animate={reduced || ready ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.5, ease: EASE }}
+            >
+              <SpatialObject scrollProgress={pinProgress} scrollInfluence={1.1} />
+            </motion.div>
+            {/* Three margin HUD panels — a "JARVIS" multi-panel frame
+                around the object. Fade out together with the rest of
+                scene A (inherited via .sceneCore's own opacity, not a
+                second transform on each) rather than lingering once the
+                core they're telemetry *for* is gone. Omitted entirely
+                under reduced motion: their own absolute positioning is
+                tuned for the pinned layout specifically, and they're
+                decorative chrome, not essential content. */}
+            {!reduced && (
+              <>
+                <CoreLog ready={ready} skipEntrance={wasReadyAtMount} />
+                <HeroVectorSpace ready={ready} skipEntrance={wasReadyAtMount} />
+                <HeroNeuralNet ready={ready} skipEntrance={wasReadyAtMount} />
+              </>
+            )}
+            <CoreSignal ready={reduced || ready} skipEntrance={wasReadyAtMount} />
+            <motion.div
+              className={styles.wordmark}
+              initial={wasReadyAtMount ? false : { opacity: 0 }}
+              animate={reduced || ready ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.4, delay: 0.15, ease: EASE }}
+            >
               <DotIcon bitmap={WORDMARK} label={profile.name} dot={3} gap={1.5} flicker />
             </motion.div>
-          )}
-        </motion.div>
-        {/* Held out of the DOM entirely (not just delayed) until ready —
-            Prompt's own typewriter timer starts unconditionally on mount
-            and isn't reduced-motion aware, so for this one hero instance
-            the correct fix is deferring the mount itself rather than
-            reaching into a component used sitewide (every other Prompt
-            usage already sits behind its own whileInView-gated wrapper
-            further down this page, so it doesn't share this bug). */}
-        {(reduced || ready) && <Prompt command="whoami" />}
-        <div className={styles.hero} ref={heroRef}>
-        <motion.div
-          className={styles.portrait}
-          initial={wasReadyAtMount ? false : "hidden"}
-          animate={reduced || ready ? "show" : "hidden"}
-          variants={fadeUp}
-          transition={{ duration: 0.3, delay: 0.3, ease: EASE }}
-        >
-          {/* The scroll-exit drift (+ Pass 25: scale) lives on its own
-              wrapper, separate from the entrance fadeUp above and
-              ParallaxItem's own entry drift below — independent transforms
-              on separate elements compose safely via normal CSS stacking,
-              instead of fighting over the same channel on one element.
-              Skipped entirely under reduced motion rather than merely
-              zeroed. */}
-          <DotField />
-          {reduced ? (
-            <ParallaxItem strength={18}>
-              <AsciiPortrait heroProgress={heroProgress} />
-            </ParallaxItem>
-          ) : (
-            <motion.div style={{ y: portraitExitY, scale: portraitExitScale }}>
-              <ParallaxItem strength={18}>
-                <AsciiPortrait heroProgress={heroProgress} />
-              </ParallaxItem>
-            </motion.div>
-          )}
-        </motion.div>
-        {/* Delayed to arrive just after the "whoami" prompt above finishes
-            typing, so the hero reads as its answer rather than racing it —
-            and, as of Pass 24, gated on the same real boot-ready signal as
-            the rest of the hero rather than a mount-time timer. */}
-        <motion.div
-          className={styles.intro}
-          initial={wasReadyAtMount ? false : "hidden"}
-          animate={reduced || ready ? "show" : "hidden"}
-          variants={listContainer}
-          transition={{ staggerChildren: 0.07, delayChildren: 0.38 }}
-          style={reduced ? undefined : { opacity: introOpacity }}
-        >
-          {/* Pass 18: the hero previously had one text tier (the tagline
-              sentence, styled slightly larger) plus undifferentiated
-              supporting lines — a font-size bump, not a hierarchy. This
-              restructures it into three real tiers using fields that
-              already existed in profile but weren't both surfaced here:
-              `role` (the actual job title — a genuine identity claim,
-              promoted to poster scale) → `tagline` (the structured,
-              technical description, demoted to a secondary line) →
-              tags/bio (system metadata, visually set apart with a rule).
-              No new content, no fabrication — the same data, composed
-              with real editorial hierarchy instead of one undifferentiated
-              block.
-
-              Pass 20: `.identity` is the hero's one "primary system
-              declaration" — it gets a real staggered, masked word-reveal
-              (MaskedText) instead of the same flat fade every other line in
-              this stagger uses. It's pulled out of the `listItem`/
-              `listContainer` orchestration entirely (MaskedText owns its
-              own entrance + delay) since a flat opacity/y variant can't
-              express a per-word mask. */}
-          <p className={styles.identity}>
-            <MaskedText text={profile.role} delay={0.4} start={reduced || ready} skipEntrance={wasReadyAtMount} />
-          </p>
-          <motion.p className={styles.role} variants={listItem}>
-            {profile.tagline}
-            <span className={styles.cursor} aria-hidden="true" />
-          </motion.p>
-          <motion.p className={styles.tags} variants={listItem}>
-            {profile.capabilityTags.join(" · ")}
-          </motion.p>
-          <div className={styles.bioBlock}>
-            {profile.bio.map((line) => (
-              <motion.p key={line} className={styles.bioLine} variants={listItem}>
-                {line}
-              </motion.p>
-            ))}
+            {/* Held out of the DOM entirely (not just delayed) until
+                ready — Prompt's own typewriter timer starts
+                unconditionally on mount and isn't reduced-motion aware,
+                so for this one hero instance the correct fix is
+                deferring the mount itself rather than reaching into a
+                component used sitewide. */}
+            {(reduced || ready) && <Prompt command="whoami" />}
           </div>
-        </motion.div>
+
+          {/* Scene B — portrait + identity. Rises in as scene A fades,
+              written directly via sceneIdentityRef in the effect above
+              rather than a motion `style` prop; under reduced motion this
+              is unstyled (no scroll transform) and instead plays its own
+              ready-gated fadeUp, same as the old layout did, so it just
+              appears in normal document flow below scene A rather than
+              depending on a pin sequence that doesn't run there. */}
+          <motion.div
+            ref={sceneIdentityRef}
+            className={styles.sceneIdentity}
+            initial={reduced && !wasReadyAtMount ? "hidden" : false}
+            animate={reduced ? (ready ? "show" : "hidden") : undefined}
+            variants={reduced ? fadeUp : undefined}
+            transition={reduced ? { duration: 0.3, delay: 0.3, ease: EASE } : undefined}
+          >
+            <div className={styles.hero}>
+              <motion.div className={styles.portrait}>
+                <DotField />
+                <ParallaxItem strength={18}>
+                  <AsciiPortrait heroProgress={reduced ? staticProgress : portraitDepthProgress} />
+                </ParallaxItem>
+              </motion.div>
+              {/* Pass 18: three real tiers using fields that already
+                  existed in profile — `role` (the actual job title, a
+                  genuine identity claim, promoted to poster scale) →
+                  `tagline` (the structured, technical description,
+                  demoted to a secondary line) → tags/bio (system
+                  metadata, visually set apart with a rule). No new
+                  content, no fabrication.
+
+                  Pass 20: `.identity` gets a real staggered, masked
+                  word-reveal (MaskedText) instead of the same flat fade
+                  every other line in this stagger uses.
+
+                  Pass 31: the stagger now triggers off sceneBRevealed
+                  (a threshold on the same pinProgress driving the outer
+                  wrapper's continuous opacity/y) instead of the old flat
+                  `ready` gate — under reduced motion it still just uses
+                  `ready` directly, matching the wrapper's own simpler
+                  fadeUp-only treatment there. */}
+              <motion.div
+                className={styles.intro}
+                initial={wasReadyAtMount ? false : "hidden"}
+                animate={(reduced ? ready : sceneBRevealed) ? "show" : "hidden"}
+                variants={listContainer}
+                transition={{ staggerChildren: 0.07, delayChildren: reduced ? 0.38 : 0.05 }}
+              >
+                <p className={styles.identity}>
+                  <MaskedText
+                    text={profile.role}
+                    delay={0.4}
+                    start={reduced ? ready : sceneBRevealed}
+                    skipEntrance={wasReadyAtMount}
+                  />
+                </p>
+                <motion.p className={styles.role} variants={listItem}>
+                  {profile.tagline}
+                  <span className={styles.cursor} aria-hidden="true" />
+                </motion.p>
+                <motion.p className={styles.tags} variants={listItem}>
+                  {profile.capabilityTags.join(" · ")}
+                </motion.p>
+                <div className={styles.bioBlock}>
+                  {profile.bio.map((line) => (
+                    <motion.p key={line} className={styles.bioLine} variants={listItem}>
+                      {line}
+                    </motion.p>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
       </div>
 

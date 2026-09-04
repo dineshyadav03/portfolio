@@ -17,19 +17,78 @@
    Pass 27: --chamber-bg reverted to pure black on explicit request — see
    globals.css. The chamber still reads as a distinct region via the
    dotted border-bottom below, without needing a background delta at all. */
+/* Pass 31: a real pinned scroll sequence, on explicit request — the core
+   hands off to the portrait/identity in the SAME viewport space, rather
+   than one simply scrolling past the other. `.chamber` becomes a tall
+   scroll runway; `.pinStage` inside it holds via `position: sticky`
+   while the visitor scrolls through that runway, and app/page.tsx's own
+   `pinProgress` (derived from THIS element's own scroll range) drives
+   which of the two scenes below is visible. 240dvh, not vh — `dvh`
+   tracks the real visible viewport on mobile browsers (address bar
+   show/hide), the same fix already used for Mascot's own positioning
+   (see [[project-portfolio-overview]]); `vh` would leave the runway
+   either short or overshooting as mobile chrome resizes mid-scroll.
+   `[data-static]` (set from `reduced` in page.tsx) drops all of this
+   back to the original normal-flow layout — no pin, no scroll runway,
+   both scenes simply stacked in document order, unfaded. Pinned scroll
+   sequences are exactly the kind of thing prefers-reduced-motion exists
+   to prevent, not just animate more gently. */
 .chamber {
   position: relative;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  padding: 56px 16px 24px;
-  min-height: 74vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   background: var(--chamber-bg);
   border-bottom: 1px dotted var(--term-border);
   margin-bottom: 24px;
+  height: 240dvh;
+}
+
+.chamber[data-static] {
+  height: auto;
+  min-height: 74vh;
+}
+
+.pinStage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 16px 24px;
+}
+
+.chamber:not([data-static]) .pinStage {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.chamber[data-static] .pinStage {
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sceneCore,
+.sceneIdentity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Stacked directly on top of each other, filling the pinned viewport —
+   this is what actually makes the handoff read as "one replaces the
+   other in place" rather than "two blocks separated in normal flow."
+   `position: absolute` here also gives `.sceneCore` its own containing
+   block for the HUD panels (CoreLog etc., `position: absolute` in their
+   own CSS) to anchor to — no separate `position: relative` needed
+   alongside it (that would have discarded the `inset: 0` fill behavior
+   instead of just adding to it, caught before this ever ran live). */
+.chamber:not([data-static]) .sceneCore,
+.chamber:not([data-static]) .sceneIdentity {
+  position: absolute;
+  inset: 0;
+  justify-content: center;
+  padding: 56px 16px 24px;
 }
 
 /* Pass 26: 280px was a flat cap regardless of how much real chamber width

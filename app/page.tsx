@@ -337,8 +337,10 @@ export default function Home() {
       </motion.div>
 
       <SectionDivider label="0.01d — system pattern" id="toc-system-pattern" />
-      <Prompt command="cat pipeline.txt" />
-      <SystemPipeline />
+      <motion.div initial="hidden" whileInView="show" viewport={revealOnce} variants={fadeUp}>
+        <Prompt command="cat pipeline.txt" />
+        <SystemPipeline />
+      </motion.div>
 
       <SectionDivider label="0.01e — status" id="toc-status" />
       <motion.div initial="hidden" whileInView="show" viewport={revealOnce} variants={listContainer}>

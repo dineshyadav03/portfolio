@@ -15,6 +15,18 @@
   max-width: 1080px;
 }
 
+/* Cancels .stage's own --nav-clearance padding (layout.module.css) —
+   real, permanent room reserved everywhere else so the fixed nav pill
+   never overlaps the titlebar text underneath it, but on the homepage
+   that text isn't rendered at all (see TerminalWindow.tsx), so the gap
+   was just bare page background showing above the hero's own chamber
+   background instead of protecting anything. Negative margin here, not a
+   change to .stage itself, so every other route keeps its clearance
+   exactly as before. */
+.window[data-home] {
+  margin-top: calc(-1 * var(--nav-clearance));
+}
+
 .titlebar {
   display: flex;
   align-items: center;

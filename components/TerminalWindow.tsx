@@ -72,6 +72,7 @@ export default function TerminalWindow({ children }: { children: React.ReactNode
   return (
     <motion.div
       className={styles.window}
+      data-home={isHome || undefined}
       role="group"
       aria-label={title}
       initial={{ opacity: 0, y: 24, scale: 0.97 }}

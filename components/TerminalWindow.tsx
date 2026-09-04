@@ -23,6 +23,15 @@ const FORMATTERS = clocks.map(
 
 export default function TerminalWindow({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  // Pass 34: on request — the titlebar + status line were sitting directly
+  // above the hero on first load, pushing its "CORE ONLINE" reveal down
+  // far enough to collide with ScrollHint's fixed bottom-of-viewport
+  // position on shorter windows, and generally crowding the moment the
+  // hero is supposed to land. The homepage's hero already establishes
+  // identity itself (CORE ONLINE, the wordmark, `whoami`) — this chrome is
+  // real, useful wayfinding on every OTHER route (the literal path, which
+  // section you're in), just redundant and heavy directly above THIS one.
+  const isHome = pathname === "/";
   // The titlebar itself shows the real, literal path (like an actual shell
   // prompt would: `~/creations/cody`, not just `~/creations`).
   const title = `visitor@${profile.handle}: ~${pathname !== "/" ? pathname : ""}`;
@@ -69,18 +78,20 @@ export default function TerminalWindow({ children }: { children: React.ReactNode
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, delay: delaySec, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className={styles.titlebar}>
-        <div className={styles.title}>{title}</div>
-        <div className={styles.clocks} suppressHydrationWarning>
-          {clocks.map((c, i) => (
-            <span key={c.label}>
-              {c.label} {now ? FORMATTERS[i].format(now) : "--:--"}
-            </span>
-          ))}
+      {!isHome && (
+        <div className={styles.titlebar}>
+          <div className={styles.title}>{title}</div>
+          <div className={styles.clocks} suppressHydrationWarning>
+            {clocks.map((c, i) => (
+              <span key={c.label}>
+                {c.label} {now ? FORMATTERS[i].format(now) : "--:--"}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       <div className={glitching ? `${styles.body} ${styles.bodyGlitch}` : styles.body}>
-        <SysHeaderBar />
+        {!isHome && <SysHeaderBar />}
         {children}
       </div>
     </motion.div>

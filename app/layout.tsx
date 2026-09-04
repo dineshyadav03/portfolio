@@ -9,6 +9,7 @@ import StatusBar from "@/components/StatusBar";
 import KeyboardNav from "@/components/KeyboardNav";
 import TerminalWindow from "@/components/TerminalWindow";
 import PageTransition from "@/components/PageTransition";
+import Nav from "@/components/Nav";
 import PageToc from "@/components/PageToc";
 import ScrollProgress from "@/components/ScrollProgress";
 import BootIntro from "@/components/BootIntro";
@@ -85,6 +86,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="grain" aria-hidden="true" />
         <KeyboardNav />
         <SmoothScroll />
+        {/* Floating pill nav — moved out of TerminalWindow's title bar on
+            request ("floating curved nav"). Same containing-block reason
+            as PageToc/ScrollProgress below: TerminalWindow's own
+            motion.div carries a persistent transform once its entrance
+            settles, which would silently break a genuine `position:
+            fixed` if this stayed nested inside it. Site-wide, not
+            homepage-only — this is primary navigation, unlike PageToc's
+            homepage-specific jump links. */}
+        <Nav />
         {/* `position: fixed`, homepage-only (checked internally via
             usePathname — see components/PageToc.tsx). Mounted here,
             outside TerminalWindow/PageTransition, deliberately: their own

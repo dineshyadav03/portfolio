@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { answerQuestion, getHelpAnswer, niaFaq } from "@/lib/niaFaq";
-import { EMPTY_CONTEXT, isContentIntent, resolveCommand, type NiaConversationContext } from "@/lib/niaIntent";
+import { useRouter } from "next/navigation";
+import { answerQuestion, niaFaq } from "@/lib/niaFaq";
+import { EMPTY_CONTEXT, isContentIntent, type NiaConversationContext } from "@/lib/niaIntent";
 import { notifyNia } from "@/lib/niaReaction";
-import { playCommandBlip, playErrorTone } from "@/lib/sound";
+import { playCommandBlip, playErrorTone, playGlitch } from "@/lib/sound";
+import { triggerGlitch } from "@/lib/eventGlitch";
+import { runTerminalCommand, TERMINAL_VERBS } from "@/lib/terminalCommands";
 import styles from "./NiaAssistant.module.css";
 
 // A handful of high-value starting points, pulled by id from niaFaq.ts
@@ -24,6 +27,7 @@ type Exchange = { question: string; answer: string; matched: boolean };
 // answerQuestion() returns. That separation is what lets a future
 // retrieval/LLM layer replace answerQuestion() without this file changing.
 export default function NiaAssistant({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const router = useRouter();
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<Exchange[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,32 +50,59 @@ export default function NiaAssistant({ open, onClose }: { open: boolean; onClose
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [history]);
 
-  // The one place a question actually reaches the knowledge layer — used
-  // by both the input form and the suggested-question chips, so neither
-  // path can diverge from the other. Exact terminal commands are checked
-  // first via resolveCommand() — a small, separate, exact-match layer
-  // (see lib/niaIntent.ts) that can never be confused with an ordinary
-  // question ("help me with projects" is not a command). "clear" is a UI
-  // action (wipe the transcript, reset the subject) handled entirely here;
-  // "help" still flows through the same history/sound/reaction logic
-  // below as any other answer, just sourced from getHelpAnswer() instead
-  // of answerQuestion() so it never touches intent detection at all.
+  // The one place text actually reaches either the real command shell or
+  // the knowledge layer — used by both the input form and the suggested-
+  // question chips, so neither path can diverge from the other. Real
+  // commands (see lib/terminalCommands.ts) are checked first, by exact
+  // whole-word match on the first token — never a substring/fuzzy match,
+  // so "help me with projects" is still an ordinary question, not a
+  // command. Everything else falls through to the fuzzy intent/FAQ layer.
   function ask(question: string) {
     const trimmed = question.trim();
     if (!trimmed) return;
 
-    const command = resolveCommand(trimmed);
-    if (command === "clear") {
-      setHistory([]);
-      contextRef.current = EMPTY_CONTEXT;
-      playCommandBlip();
-      notifyNia("success");
+    // Pass 29: the real terminal shell (ls/cd/cat/skills/search/status/
+    // open/theme/contact/whoami/sudo/matrix — see lib/terminalCommands.ts)
+    // used to live in its own standalone CommandLine row on every page;
+    // removed on request, folded in here instead, so Nia is the one place
+    // both real commands and ordinary questions work. Checked by whole-
+    // word match on the first token, before anything else — a command
+    // verb always wins outright, the same "exact match, never fuzzy"
+    // guarantee resolveCommand() below already holds for "help"/"clear",
+    // just extended to the full verb set instead of just those two.
+    const firstWord = trimmed.split(/\s+/)[0]?.toLowerCase();
+    if (firstWord && TERMINAL_VERBS.has(firstWord)) {
+      const result = runTerminalCommand(trimmed, router);
+      if (result.cleared) {
+        setHistory([]);
+        contextRef.current = EMPTY_CONTEXT;
+        playCommandBlip();
+        notifyNia("success");
+        setValue("");
+        return;
+      }
+      setHistory((h) => [...h, { question: trimmed, answer: result.output.join("\n"), matched: result.ok }].slice(-MAX_HISTORY));
+      // Commands get the same "a real system event just happened" sound
+      // pairing CommandLine used to fire (blip/error + a glitch burst),
+      // distinct from an ordinary FAQ exchange's softer treatment below —
+      // running `cd work` should feel like it did something, not like
+      // Nia just answered a question.
+      if (result.ok) playCommandBlip();
+      else playErrorTone();
+      triggerGlitch();
+      playGlitch();
+      notifyNia(result.ok ? "success" : "error");
       setValue("");
       return;
     }
 
-    const { answer, matched, intent } =
-      command === "help" ? getHelpAnswer(contextRef.current) : answerQuestion(trimmed, contextRef.current);
+    // "help" and "clear" no longer reach here at all — both are in
+    // TERMINAL_VERBS and handled above. Everything that does reach this
+    // point is real natural-language text, so it always goes through the
+    // fuzzy intent/FAQ path (which still resolves a *phrased* help
+    // request like "what can you do" via its own "help" intent entry —
+    // see lib/niaFaq.ts — independent of the exact-command path above).
+    const { answer, matched, intent } = answerQuestion(trimmed, contextRef.current);
     // A real topic (identity/work/projects/...) becomes the new subject a
     // later "what about his goals?" can resolve against. An unmatched
     // question clears it instead — the visitor asked something genuinely

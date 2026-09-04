@@ -4,7 +4,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
+  /* Extra top clearance (32px -> 84px) — the floating pill nav
+     (Nav.module.css) is `position: fixed` at the true viewport top now,
+     independent of this box's own layout, and without this it visibly
+     overlapped the terminal window's own title-bar text underneath it
+     (confirmed live). This reserves real, permanent room for it instead
+     of letting it float over content that was never designed to have
+     something on top of it. */
+  padding: 84px 16px 32px;
   gap: 0;
 }
 

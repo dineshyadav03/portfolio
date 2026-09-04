@@ -58,9 +58,10 @@ export default function PageTransition({ children }: { children: React.ReactNode
   const transitionKey = pathname.startsWith("/creations/") ? "/creations" : pathname;
   const t = TRANSITIONS[transitionKey] ?? TRANSITIONS["/"];
   // The one place that actually knows a navigation happened, regardless of
-  // whether it came from clicking Nav, pressing 1-4, or running `cd` in the
-  // terminal (CommandLine.tsx) — all three ultimately go through the same
-  // router, which is the only thing this component watches. Skipped on the
+  // whether it came from clicking Nav, pressing 1-4, or running `cd` via
+  // Nia's terminal shell (lib/terminalCommands.ts) — all three ultimately
+  // go through the same router, which is the only thing this component
+  // watches. Skipped on the
   // very first render (the initial page load isn't a "navigation").
   const prevPathnameRef = useRef(pathname);
   useEffect(() => {

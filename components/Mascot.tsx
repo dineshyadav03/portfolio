@@ -111,9 +111,17 @@ export default function Mascot() {
     return () => clearInterval(id);
   }, [reduced, ready, assistantOpen]);
 
+  // A real toggle now, not just an "open" trigger — tapping her again
+  // while the panel's already open closes it, matching how the panel's
+  // own close button already behaves rather than requiring a visitor to
+  // find that separate control. The greeting bubble only plays on the
+  // opening tap; closing has nothing to greet.
   function handleActivate() {
-    showBubble(true);
-    setAssistantOpen(true);
+    setAssistantOpen((prev) => {
+      const next = !prev;
+      if (next) showBubble(true);
+      return next;
+    });
   }
 
   // A brief, self-clearing acknowledgement of something happening elsewhere

@@ -27,6 +27,11 @@
      perceptual contrast (Weber's law), effectively invisible. #141414
      fixed that gap but overshot into looking like a separate panel. */
   --chamber-bg: #000000;
+  /* For the floating pill nav (Nav.module.css) — semi-transparent so
+     content visibly scrolls underneath it (paired with backdrop-filter:
+     blur there), rather than reading as another solid opaque panel like
+     --chamber-bg was explicitly moved away from being, above. */
+  --term-glass-bg: rgba(0, 0, 0, 0.72);
   /* The one entrance/reveal easing curve used across the whole site —
      see lib/motion.ts's `EASE`/`EASE_CSS` for the framer-motion side of
      the same curve. Module CSS transitions should reference this instead
@@ -53,6 +58,7 @@
   /* Light theme's --term-titlebar (#ece3d0) already reads clearly against
      --page-bg (#f5f1e8) — confirmed live, no change needed here. */
   --chamber-bg: #ece3d0;
+  --term-glass-bg: rgba(245, 241, 232, 0.78);
 }
 
 * {

@@ -6,8 +6,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import { clocks, nav, profile } from "@/lib/content";
 import { useBootRevealDelay } from "@/lib/bootTiming";
 import { onGlitchTrigger } from "@/lib/eventGlitch";
-import Nav from "./Nav";
-import CommandLine from "./CommandLine";
 import SysHeaderBar from "./SysHeaderBar";
 import styles from "./TerminalWindow.module.css";
 
@@ -95,10 +93,8 @@ export default function TerminalWindow({ children }: { children: React.ReactNode
               CODE: {section.code} — {section.label}
             </p>
           )}
-          <Nav />
         </div>
         {children}
-        <CommandLine />
       </div>
     </motion.div>
   );

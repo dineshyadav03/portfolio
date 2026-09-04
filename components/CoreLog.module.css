@@ -1,17 +1,24 @@
 /* Relocated on direct request from an overlay on the object itself to a
-   real margin panel beside it — anchored to .chamber (page.module.css,
-   `position: relative`), not .spatialWrap, since it now needs to sit in
-   space the object's own small box doesn't cover. Wide-viewport only: at
-   ~1080px and narrower the object/text column already claims most of the
-   chamber's width (see SpatialObject's own vw-driven sizing), so there's
-   no real margin left for a side panel to occupy without overlapping
-   content — same reasoning PageToc already applies to its own
-   wide-viewport-only gate. */
+   real margin panel beside it — anchored to .sceneCore (page.module.css,
+   `position: absolute; inset: 0`, the pinned hero scene — see Pass 31/32),
+   not .spatialWrap, since it now needs to sit in space the object's own
+   small box doesn't cover.
+   Pass 35: gate dropped from 1200px to 768px — on request, after most
+   real visitors turned out to be narrower than 1200px and so never saw
+   this at all. Checked live at 768/900/1024/1200px: the object and
+   wordmark both center within the FULL chamber width (100vw, not the
+   1080px content column — same reason SpatialObject's own sizing is
+   vw-driven), so the margin this panel occupies stays genuinely clear
+   at every one of those widths, not just the ones above the old 1200px
+   mark. 768px was the floor actually tested clean, not a smaller
+   assumed-safe number — matches the site's own 640px mobile breakpoint
+   as the next tier up, and PageToc's own wide-viewport-only gate uses
+   the same reasoning for its own, separate threshold. */
 .log {
   display: none;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 768px) {
   .log {
     display: flex;
     position: absolute;

@@ -7,6 +7,7 @@ import AnnouncementBanner from "@/components/AnnouncementBanner";
 import BuildStatusPanel from "@/components/BuildStatusPanel";
 import CapabilitySystem from "@/components/CapabilitySystem";
 import CoreLog from "@/components/CoreLog";
+import CoreReadout from "@/components/CoreReadout";
 import CoreSignal from "@/components/CoreSignal";
 import DotField from "@/components/DotField";
 import DotIcon from "@/components/DotIcon";
@@ -221,6 +222,7 @@ export default function Home() {
               </>
             )}
             <CoreSignal ready={reduced || ready} skipEntrance={wasReadyAtMount} />
+            <CoreReadout ready={ready} skipEntrance={wasReadyAtMount} />
             <motion.div
               className={styles.wordmark}
               initial={wasReadyAtMount ? false : { opacity: 0 }}

@@ -6,7 +6,7 @@
    Positioned in the upper portion of the right margin; HeroNeuralNet
    takes the lower portion, so the two read as a matched pair framing the
    object rather than one panel awkwardly alone. */
-@media (min-width: 1200px) {
+@media (min-width: 768px) {
   .panel {
     display: block;
     position: absolute;

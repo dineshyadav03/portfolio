@@ -1,0 +1,46 @@
+/* The compact counterpart to CoreLog's own margin panel — same real
+   numbers, one quiet line instead of four. Visible below the side panels'
+   own 768px threshold (CoreLog.module.css) and hidden at or above it, so
+   a wide viewport shows the fuller panel version instead of both at once. */
+.readout {
+  margin: 0 0 14px;
+  font-size: 0.6rem;
+  letter-spacing: 0.03em;
+  color: var(--term-muted);
+  text-align: center;
+  animation: readoutFadeIn 0.4s var(--ease-standard) both;
+  animation-delay: 0.45s;
+}
+
+.readout[data-skip-entrance] {
+  animation: none;
+}
+
+@media (min-width: 768px) {
+  .readout {
+    display: none;
+  }
+}
+
+@keyframes readoutFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.label {
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--term-fg-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.sep {
+  color: var(--term-border);
+  margin: 0 8px;
+}

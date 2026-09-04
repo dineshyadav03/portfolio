@@ -12,9 +12,18 @@ export default function ScrollHint() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // The homepage's hero chamber (#toc-about) is a tall pinned-scroll
+    // runway (see app/page.tsx) — a flat 40px threshold would hide this
+    // hint the instant that sequence starts, long before a visitor has
+    // scrolled anywhere near the end of it. Where that element exists,
+    // stay visible for as long as any part of it is still ahead (its
+    // bottom edge hasn't yet passed the viewport top); elsewhere, fall
+    // back to the original "still near the very top" threshold.
     const check = () => {
       const scrollable = document.documentElement.scrollHeight > window.innerHeight + 120;
-      setVisible(scrollable && window.scrollY < 40);
+      const chamber = document.getElementById("toc-about");
+      const nearTop = chamber ? chamber.getBoundingClientRect().bottom > 0 : window.scrollY < 40;
+      setVisible(scrollable && nearTop);
     };
     check();
     window.addEventListener("scroll", check, { passive: true });

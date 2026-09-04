@@ -169,12 +169,25 @@
 }
 
 .role {
-  margin: 0 0 14px;
+  margin: 0 0 6px;
   font-size: 1.05rem;
   line-height: 1.55;
   font-weight: 500;
   letter-spacing: 0.005em;
   color: var(--term-fg-dim);
+  max-width: 48ch;
+}
+
+/* States the tagline above, then immediately qualifies it — the same
+   "claim, then a quick undercut" rhythm as illoca.unseen.co's hero
+   (a small annotation qualifying the big claim next to it), rebuilt in
+   this site's own terminal-comment voice rather than their hand-drawn
+   annotation device. */
+.undercut {
+  margin: 0 0 16px;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--term-muted);
   max-width: 48ch;
 }
 

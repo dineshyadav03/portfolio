@@ -297,6 +297,13 @@ export default function Home() {
                   {profile.tagline}
                   <span className={styles.cursor} aria-hidden="true" />
                 </motion.p>
+                {/* States the claim above, then immediately qualifies it —
+                    comment-style so it reads as a system annotation on the
+                    tagline rather than a third bio sentence. */}
+                <motion.p className={styles.undercut} variants={listItem}>
+                  {"// "}
+                  {profile.taglineUndercut}
+                </motion.p>
                 <motion.p className={styles.tags} variants={listItem}>
                   {profile.capabilityTags.join(" · ")}
                 </motion.p>

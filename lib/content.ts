@@ -6,6 +6,11 @@ export const profile = {
   handle: "dineshyadav",
   role: "AI Engineer & Forward Deployed Engineer",
   tagline: "I build, deploy, and improve AI systems for real-world workflows.",
+  // A short, quieter counter-line right under the tagline — states the
+  // claim, then immediately qualifies it, rather than just stacking
+  // another declarative sentence. Comment-style ("//") to read as a
+  // system annotation on the line above it, not a third bio sentence.
+  taglineUndercut: "not a demo — shipped into real codebases.",
   capabilityTags: ["LLMs", "RAG", "Agents", "Automation", "AI Infrastructure"],
   bio: [
     "Building scalable AI products, open-source tools, and real-world systems — across LLMs, agents, computer vision, and robotics.",

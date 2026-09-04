@@ -75,23 +75,3 @@
     transform: translate(0, 0);
   }
 }
-
-.kickerRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px 22px;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--term-border);
-}
-
-.kicker {
-  margin: 0;
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--term-muted);
-}

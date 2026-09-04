@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { sysHeader, sysHeaderRight } from "@/lib/content";
+import { usePathname } from "next/navigation";
+import { nav, sysHeader, sysHeaderRight } from "@/lib/content";
 import { getSystemStatus, onSystemStatusChange, type SystemStatus } from "@/lib/systemStatus";
 import UptimeStat from "./UptimeStat";
 import styles from "./SysHeaderBar.module.css";
@@ -35,6 +36,16 @@ export default function SysHeaderBar() {
   // a client-side route change — where this component was already mounted
   // and boot already finished — never flashes back to "initializing".
   const [status, setStatus] = useState<SystemStatus>(getSystemStatus);
+  const pathname = usePathname();
+  // Pass 33: previously TerminalWindow's own separate "CODE: 0.01 — ABOUT"
+  // kicker row, with its own margin/border — a third full line of chrome
+  // (after the titlebar and this line) sitting between BootIntro clearing
+  // and the hero's own reveal, undercutting it on first load. Folded into
+  // this line instead — same info, same active-section lookup TerminalWindow
+  // used to do — so the whole status block is one line, not three.
+  const section = nav.find((item) =>
+    item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`),
+  );
 
   useEffect(() => onSystemStatusChange(setStatus), []);
 
@@ -49,6 +60,12 @@ export default function SysHeaderBar() {
             </span>
           </span>
         ))}
+        {section && (
+          <span>
+            <span className={styles.sep}>·</span>
+            {section.code} — {section.label}
+          </span>
+        )}
       </p>
       <p className={styles.row}>
         <span className={styles.label}>uptime</span> <UptimeStat />

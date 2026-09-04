@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { clocks, nav, profile } from "@/lib/content";
+import { clocks, profile } from "@/lib/content";
 import { useBootRevealDelay } from "@/lib/bootTiming";
 import { onGlitchTrigger } from "@/lib/eventGlitch";
 import SysHeaderBar from "./SysHeaderBar";
@@ -23,14 +23,8 @@ const FORMATTERS = clocks.map(
 
 export default function TerminalWindow({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  // Pass 26: a project's own page (/creations/[slug]) still belongs to
-  // "work" for the kicker's sake (matches the same prefix-match fix in
-  // Nav.tsx) — but the titlebar itself shows the real, literal path (like
-  // an actual shell prompt would: `~/creations/cody`, not just
-  // `~/creations`), not the parent section's href.
-  const section = nav.find((item) =>
-    item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`),
-  );
+  // The titlebar itself shows the real, literal path (like an actual shell
+  // prompt would: `~/creations/cody`, not just `~/creations`).
   const title = `visitor@${profile.handle}: ~${pathname !== "/" ? pathname : ""}`;
   const delaySec = useBootRevealDelay();
   const reduced = useReducedMotion();
@@ -87,13 +81,6 @@ export default function TerminalWindow({ children }: { children: React.ReactNode
       </div>
       <div className={glitching ? `${styles.body} ${styles.bodyGlitch}` : styles.body}>
         <SysHeaderBar />
-        <div className={styles.kickerRow}>
-          {section && (
-            <p className={styles.kicker}>
-              CODE: {section.code} — {section.label}
-            </p>
-          )}
-        </div>
         {children}
       </div>
     </motion.div>

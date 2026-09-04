@@ -3,7 +3,12 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 24px;
-  margin-bottom: 10px;
+  /* Pass 33: this is now the only line of chrome between the titlebar and
+     real content (the old separate "CODE: ..." kicker line/divider is
+     folded into this row instead — see SysHeaderBar.tsx) — a bit more
+     room than the old 10px so content doesn't crowd straight up against
+     it now that there's no second border-bottom underneath. */
+  margin-bottom: 18px;
 }
 
 .row {

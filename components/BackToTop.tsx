@@ -5,13 +5,13 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { getLenisInstance } from "@/lib/lenisInstance";
 import styles from "./BackToTop.module.css";
 
-// Left-center, mirroring PageToc's right-center position (components/
-// PageToc.module.css) — the one piece of fixed-chrome real estate nothing
-// else on the page claims: Nav owns the top, PageToc/ScrollProgress the
-// right side and top bar, Mascot + its toggle circle + ScrollHint the
-// bottom band. Sitewide and not viewport-gated (unlike PageToc, which is
-// homepage-only and wide-viewport-only) — every route can get long enough
-// to want this, mobile included.
+// Top-left corner by default (safe at every width and on every route —
+// see BackToTop.module.css for what that ruled out), switching to
+// left-center — mirroring PageToc's right-center position — only once
+// the viewport is wide enough to have real margin there, the same
+// 1220px threshold PageToc itself already relies on. Sitewide and not
+// route-gated (unlike PageToc, which is homepage-only) — every route can
+// get long enough to want this, mobile included.
 const SHOW_AFTER_VH = 1;
 
 export default function BackToTop() {

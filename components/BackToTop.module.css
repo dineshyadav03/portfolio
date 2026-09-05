@@ -1,18 +1,32 @@
 /* Same bordered-chip language as ScrollHint (its visual opposite — scroll
-   up instead of down), positioned left-center to mirror PageToc's
-   right-center placement (components/PageToc.module.css) rather than
-   competing with it, Nav, or Mascot's own bottom-band territory. */
+   up instead of down).
+
+   Pass 36 correction: this originally defaulted to left-center (mirroring
+   PageToc's right-center placement) and only special-cased mobile below
+   640px. That was wrong — verified live on a project detail page at
+   800px wide (well above 640px, a completely ordinary laptop-window
+   size): TerminalWindow's own content column has no special full-bleed
+   treatment there the way the homepage hero does, so left-center floated
+   directly over the build-log text. PageToc, the component this was
+   meant to mirror, already knows this — it gates its OWN left/right-
+   margin position behind `min-width: 1220px` specifically because normal
+   content doesn't leave real margin below that width. This component
+   just wasn't following the precedent it cited.
+
+   So: top-left corner (verified safe at every width, mobile included —
+   see the mobile investigation below) is now the actual default, and
+   left-center is the special case, gated at the exact same 1220px
+   PageToc already proved safe, not a separately-invented number. */
 .button {
   position: fixed;
-  left: clamp(16px, 2.5vw, 40px);
-  top: 50%;
-  transform: translateY(-50%);
+  left: 8px;
+  top: 8px;
   z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 6px 10px 5px;
+  padding: 5px 8px 4px;
   border: 1px solid var(--term-border);
   border-radius: 4px;
   background: var(--term-titlebar);
@@ -33,6 +47,7 @@
 }
 
 .label {
+  display: none;
   font-size: 0.58rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -43,30 +58,19 @@
   line-height: 1;
 }
 
-/* Below 640px, content genuinely spans the full viewport width (single
-   column, no side margins) — left-center here would float directly over
-   scrolling text at some point on every page, confirmed live (it landed
-   right across the hero's identity heading). The bottom band isn't a
-   safe alternative either: Nia's mascot wanders it *horizontally across
-   the full width*, confirmed live at both x~16px and x~290px within a
-   few seconds of each other, and her fixed vertical band (measured
-   top:753/812px viewport — 14-59px above the bottom edge) overlaps
-   ScrollHint's own bottom:14px too closely to add a third element there
-   safely. Top-left is the one corner nothing else claims at any scroll
-   position: Nav's pill is horizontally centered with real margin before
-   it starts (measured left:66px even at full width), and it's off
-   entirely below its own show/hide threshold, so this never fights it
-   in either state. */
-@media (max-width: 640px) {
+/* Content genuinely has real side margin below the viewport's own edge
+   at this width (same threshold PageToc's own right-center placement
+   already relies on) — safe to move off the corner and mirror it on the
+   opposite side. */
+@media (min-width: 1220px) {
   .button {
-    left: 8px;
-    top: 8px;
-    bottom: auto;
-    transform: none;
-    padding: 5px 8px 4px;
+    left: clamp(16px, 2.5vw, 40px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 10px 5px;
   }
 
   .label {
-    display: none;
+    display: block;
   }
 }

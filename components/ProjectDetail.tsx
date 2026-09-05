@@ -23,9 +23,15 @@ export default function ProjectDetail({ project }: { project: Project }) {
         </Link>
       </motion.div>
 
-      <motion.div className={styles.visualWrap} variants={listItem}>
-        <ProjectSignature seed={project.name} status={project.status} />
-      </motion.div>
+      {/* The generic procedural signature is this page's only visual for
+          most projects — but AEGIS's case study opens with its own real
+          cover image (CaseStudy.tsx), which already does that job better,
+          so showing both back to back would just be redundant. */}
+      {!project.caseStudy?.images && (
+        <motion.div className={styles.visualWrap} variants={listItem}>
+          <ProjectSignature seed={project.name} status={project.status} />
+        </motion.div>
+      )}
 
       <motion.div className={styles.head} variants={listItem}>
         <span className={styles.stateDot} data-state={project.status ?? "active"} aria-hidden="true" />

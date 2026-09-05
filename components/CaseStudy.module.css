@@ -1,0 +1,203 @@
+.wrap {
+  margin-top: 8px;
+  padding-top: 28px;
+  border-top: 1px dotted var(--term-border);
+}
+
+.pitch {
+  margin: 0 0 36px;
+  padding: 16px 20px;
+  border-left: 2px solid var(--term-accent);
+  color: var(--term-fg);
+  font-size: 1rem;
+  font-style: italic;
+  line-height: 1.6;
+  max-width: 68ch;
+}
+
+.section {
+  margin-bottom: 36px;
+}
+
+.heading {
+  margin: 0 0 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--term-mint);
+}
+
+.body {
+  margin: 0 0 14px;
+  color: var(--term-fg-dim);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  max-width: 68ch;
+}
+
+.note {
+  margin: 14px 0 0;
+  color: var(--term-muted);
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.6;
+  max-width: 68ch;
+}
+
+.statList {
+  margin: 0 0 20px;
+  padding-left: 18px;
+  color: var(--term-fg-dim);
+  font-size: 0.85rem;
+  line-height: 1.65;
+  max-width: 68ch;
+}
+
+.statList li {
+  margin-bottom: 8px;
+}
+
+.statList li::marker {
+  color: var(--term-accent);
+}
+
+.scenarios {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.scenario {
+  padding: 12px 14px;
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+}
+
+.scenarioTag {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 2px 6px;
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+  color: var(--term-accent);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scenarioTitle {
+  margin: 0 0 6px;
+  color: var(--term-fg);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.scenarioBody {
+  margin: 0;
+  color: var(--term-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.stageList {
+  margin: 0;
+}
+
+.stageRow {
+  display: flex;
+  gap: 18px;
+  padding: 12px 0;
+  border-bottom: 1px dotted var(--term-border);
+}
+
+.stageRow:first-child {
+  padding-top: 0;
+}
+
+.stageRow:last-child {
+  border-bottom: none;
+}
+
+.stageName {
+  flex: 0 0 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--term-fg);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stackChoice {
+  color: var(--term-mint);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.stageRole {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  color: var(--term-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.phase {
+  margin-bottom: 24px;
+}
+
+.phaseTitle {
+  margin: 0 0 10px;
+  color: var(--term-fg);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.entry {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--term-border);
+  border-radius: 3px;
+}
+
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+.entryField {
+  margin: 0 0 6px;
+  color: var(--term-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.entryField:last-child {
+  margin-bottom: 0;
+}
+
+.entryLabel {
+  color: var(--term-fg-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 640px) {
+  .scenarios {
+    grid-template-columns: 1fr;
+  }
+
+  .stageRow {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stageName {
+    flex: none;
+  }
+}

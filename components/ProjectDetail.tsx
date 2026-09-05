@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Project } from "@/lib/content";
 import { listContainer, listItem } from "@/lib/motion";
+import CaseStudy from "./CaseStudy";
 import ProjectSignature from "./ProjectSignature";
 import styles from "@/app/creations/[slug]/page.module.css";
 
@@ -58,6 +59,8 @@ export default function ProjectDetail({ project }: { project: Project }) {
           </a>
         </motion.div>
       )}
+
+      {project.caseStudy && <CaseStudy data={project.caseStudy} />}
     </motion.div>
   );
 }

@@ -151,6 +151,18 @@ export type CaseStudy = {
   }[];
   skills: { area: string; detail: string }[];
   openItems: string[];
+  // Optional — only AEGIS has real generated figures so far (see
+  // public/aegis/). Each is a real 1x, natural-dimension PNG; width/height
+  // here are those PNGs' actual pixel dimensions, not arbitrary display
+  // sizes, since next/image requires the real intrinsic size to reserve
+  // layout space correctly before the image loads.
+  images?: {
+    cover: { src: string; width: number; height: number; alt: string };
+    problemFacts: { src: string; width: number; height: number; alt: string };
+    attackPatterns: { src: string; width: number; height: number; alt: string };
+    architecture: { src: string; width: number; height: number; alt: string };
+    graphRag: { src: string; width: number; height: number; alt: string };
+  };
 };
 
 export type Project = {
@@ -473,6 +485,38 @@ export const projects: Project[] = [
         "One Neo4j procedure used is deprecated in favor of a newer Cypher clause — kept the working, verified version rather than risk breaking it over an unverified syntax swap; flagged in code for a future revisit.",
         "Gemini's free-tier daily quota (20 requests) is easy to exhaust during heavy testing — every stage degrades gracefully when that happens, which is itself the point being demonstrated, but it does mean live-LLM demos need pacing.",
       ],
+      images: {
+        cover: {
+          src: "/aegis/cover.png",
+          width: 1376,
+          height: 451,
+          alt: "The six-agent pipeline as a flowing diagram: Ingest, Detect, Classify, Reflect, Respond, Report, with a feedback loop from Reflect back to Classify and the Respond node highlighted in red as the one autonomous action.",
+        },
+        problemFacts: {
+          src: "/aegis/problem-facts.png",
+          width: 1672,
+          height: 941,
+          alt: "A security-operations-center dashboard styled infographic showing four real statistics: $4.9M average breach cost, 250+ days to identify a credential breach, thousands of alerts per day per analyst mostly unreviewed, and zero SOC staff at most small teams.",
+        },
+        attackPatterns: {
+          src: "/aegis/attack-patterns.png",
+          width: 1672,
+          height: 941,
+          alt: "A four-quadrant diagram of the real attack patterns Aegis is built to catch: repeated brute-force login attempts until one succeeds, a routine user and an attacker account looking identical until privilege escalation, a 3 a.m. data exfiltration to an external destination, and impossible travel between two distant logins.",
+        },
+        architecture: {
+          src: "/aegis/architecture.png",
+          width: 1672,
+          height: 941,
+          alt: "A state-graph diagram of the six-stage pipeline — Ingest, Detect, Classify, Reflect, Respond, Report — with a capped retry loop from Reflect back to Classify and two short-circuit paths straight to Report.",
+        },
+        graphRag: {
+          src: "/aegis/graphrag.png",
+          width: 1448,
+          height: 1086,
+          alt: "A knowledge-graph diagram showing the real traversal path CVE to CWE to CAPEC to Attack Technique, highlighted among a larger surrounding graph of related nodes.",
+        },
+      },
     },
   },
   {

@@ -4,6 +4,28 @@
   border-top: 1px dotted var(--term-border);
 }
 
+/* These figures carry their own palette (a security-ops red/amber/cyan,
+   not the site's warm orange/mint) — deliberately, on request: they're
+   the actual product's own generated visual identity, not portfolio
+   chrome, the same way the numbers and code in this case study are the
+   real project's own. The border is the one piece of this site's own
+   language they still wear, so they read as content sitting in this
+   page rather than an unrelated image pasted in. */
+.figure {
+  margin: 20px 0;
+  padding: 0;
+  border: 1px solid var(--term-border);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+}
+
+.figureImg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .pitch {
   margin: 0 0 36px;
   padding: 16px 20px;

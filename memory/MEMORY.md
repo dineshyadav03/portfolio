@@ -1,4 +1,6 @@
 - [User profile](user_profile.md) — Dinesh Yadav, AI/FDE engineer, real social links, X bio content
-- [Portfolio overview](project_portfolio_overview.md) — current tech/design state, component behaviors, content TODOs
+- [Portfolio overview](project_portfolio_overview.md) — SPLIT STATE: homepage now dark/glass/Inter (Pass 37 pivot), inner pages still old terminal system
 - [Original, not copied](feedback_original_not_copied.md) — hard boundary on reference-site copying, how to handle it
 - [Dev verification quirks](feedback_dev_verification_quirks.md) — screenshot timing trick, piped exit-code gotcha
+- [Rebuild protocol](feedback_rebuild_protocol.md) — standing OS for every pass: diagnose-first, 1-3 interventions max, Nia gated, report format
+- [framer-motion scroll-style bug](project_framer_motion_scroll_style_bug.md) — motion.div style={{opacity: transform}} can freeze mid-scroll; fix via ref + direct DOM writes

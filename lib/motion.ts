@@ -26,7 +26,7 @@ export const EASE_CSS = "cubic-bezier(0.16, 1, 0.3, 1)";
 export const DURATION = {
   micro: 0.18,
   interaction: 0.32,
-  reveal: 0.55,
+  reveal: 0.7,
 } as const;
 
 // Pass 16: named `damp()` rates (lib/physics.ts) — the site's continuous

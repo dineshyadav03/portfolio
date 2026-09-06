@@ -1,362 +1,259 @@
-.hero,
-.capability {
+/* Pass 17: this was previously capped at a flat 170px on virtually every
+   real screen (min(170px, 42vw) — 42vw only wins below ~405px wide), so
+   the site's one dedicated 3D element — the literal first thing a visitor
+   sees — rendered as a small decorative icon rather than a system with
+   real presence. SpatialObject's internal canvas scale already derives
+   entirely from its container's measured width (no JS change needed
+   here), so this is a pure composition fix: the geometry gets genuinely
+   larger and more detailed, not just re-timed. */
+/* Pass 19: a genuinely distinct spatial register for the hero, not a
+   bigger version of the same 900px column every other section uses. See
+   the JSX comment in page.tsx for the full reasoning.
+   Pass 23: background switched from --term-titlebar to the dedicated
+   --chamber-bg (see globals.css) — the shared title-bar token never had
+   enough contrast against --page-bg in dark theme to actually read as a
+   distinct panel; this was invisible on every real dark-theme visit until
+   now. Verified live in both themes.
+   Pass 27: --chamber-bg reverted to pure black on explicit request — see
+   globals.css. The chamber still reads as a distinct region via the
+   dotted border-bottom below, without needing a background delta at all. */
+/* Pass 31: a real pinned scroll sequence, on explicit request — the core
+   hands off to the portrait/identity in the SAME viewport space, rather
+   than one simply scrolling past the other. `.chamber` becomes a tall
+   scroll runway; `.pinStage` inside it holds via `position: sticky`
+   while the visitor scrolls through that runway, and app/page.tsx's own
+   `pinProgress` (derived from THIS element's own scroll range) drives
+   which of the two scenes below is visible. 240dvh, not vh — `dvh`
+   tracks the real visible viewport on mobile browsers (address bar
+   show/hide), the same fix already used for Mascot's own positioning
+   (see [[project-portfolio-overview]]); `vh` would leave the runway
+   either short or overshooting as mobile chrome resizes mid-scroll.
+   `[data-static]` (set from `reduced` in page.tsx) drops all of this
+   back to the original normal-flow layout — no pin, no scroll runway,
+   both scenes simply stacked in document order, unfaded. Pinned scroll
+   sequences are exactly the kind of thing prefers-reduced-motion exists
+   to prevent, not just animate more gently. */
+.chamber {
   position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 48px;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 100vh;
-  min-height: 100svh;
-  padding: 0 20px 48px;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  background: var(--chamber-bg);
+  border-bottom: 1px dotted var(--term-border);
+  margin-bottom: 24px;
+  height: 240dvh;
 }
 
-@media (min-width: 640px) {
-  .hero,
-  .capability {
-    padding: 0 32px 64px;
-  }
+.chamber[data-static] {
+  height: auto;
+  min-height: 74vh;
 }
 
-@media (min-width: 768px) {
-  .hero,
-  .capability {
-    padding: 0 48px 64px;
-  }
-}
-
-.heroTop,
-.capabilityTop {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  padding-top: 32px;
-}
-
-@media (min-width: 640px) {
-  .heroTop,
-  .capabilityTop {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-.serviceList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.serviceItem {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--fg-dim);
-}
-
-.heroIntro,
-.capabilityIntro {
-  max-width: 24rem;
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: var(--fg);
-}
-
-@media (min-width: 640px) {
-  .heroIntro,
-  .capabilityIntro {
-    text-align: right;
-    font-size: 1.25rem;
-  }
-}
-
-.heroBottom,
-.capabilityBottom {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-@media (min-width: 768px) {
-  .heroBottom {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
-
-  .capabilityBottom {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 64px;
-  }
-}
-
-.heroBottomLeft,
-.capabilityLeft {
-  display: flex;
-  flex-direction: column;
-}
-
-.capabilityLeft {
-  max-width: 40rem;
-}
-
-.badge {
-  display: inline-block;
-  align-self: flex-start;
-  margin-bottom: 20px;
-  padding: 6px 12px;
-  border-left: 2px solid var(--fg);
-  background: var(--glass-15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  font-size: 0.7rem;
-  font-style: italic;
-  letter-spacing: 0.02em;
-  color: var(--fg);
-}
-
-.h1 {
-  margin: 0;
-  font-size: 2.75rem;
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: var(--fg);
-}
-
-.h1Line {
-  display: block;
-}
-
-@media (min-width: 640px) {
-  .h1 {
-    font-size: 3.75rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .h1 {
-    font-size: 4.5rem;
-  }
-}
-
-.contactCard {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  border-radius: 12px;
-  background: var(--glass-15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 12px;
-}
-
-.avatar {
+.pinStage {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  height: 80px;
-  width: 80px;
-  border-radius: 8px;
-  background: var(--glass-10);
-  color: var(--fg);
-  font-size: 1.5rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  padding: 56px 16px 24px;
 }
 
-.contactText {
+.chamber:not([data-static]) .pinStage {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.chamber[data-static] .pinStage {
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sceneCore,
+.sceneIdentity {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-right: 8px;
-}
-
-.contactName {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--fg);
-}
-
-.contactRole {
-  margin: 0;
-  font-size: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--fg-muted);
-}
-
-.contactCta {
-  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 6px;
-  border-radius: 999px;
-  background: var(--fg);
-  color: #0a0a0a;
-  padding: 8px 16px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-decoration: none;
-  width: fit-content;
-  transition: background-color 0.2s var(--ease-standard);
-}
-
-.contactCta:hover {
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.contactCta:focus-visible {
-  outline: 1px solid var(--fg);
-  outline-offset: 2px;
-}
-
-.spacer {
-  height: 80vh;
-}
-
-.capabilityBody {
-  margin: 24px 0 0;
-  max-width: 32rem;
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: var(--fg-muted);
-}
-
-@media (min-width: 640px) {
-  .capabilityBody {
-    font-size: 1rem;
-  }
-}
-
-.ctaRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 32px;
-}
-
-.ctaPrimary,
-.ctaSecondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: background-color 0.2s var(--ease-standard);
-}
-
-@media (min-width: 640px) {
-  .ctaPrimary,
-  .ctaSecondary {
-    font-size: 0.875rem;
-  }
-}
-
-.ctaPrimary {
-  background: var(--fg);
-  color: #0a0a0a;
-}
-
-.ctaPrimary:hover {
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.ctaSecondary {
-  border: 1px solid var(--border-25);
-  background: var(--glass-10);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--fg);
-}
-
-.ctaSecondary:hover {
-  background: var(--glass-15);
-}
-
-.ctaPrimary:focus-visible,
-.ctaSecondary:focus-visible {
-  outline: 1px solid var(--fg);
-  outline-offset: 2px;
-}
-
-.panel {
   width: 100%;
-  max-width: 28rem;
-  border-radius: 16px;
-  border: 1px solid var(--border-15);
-  background: var(--glass-10);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 0 20px;
 }
 
-@media (min-width: 640px) {
-  .panel {
-    padding: 0 24px;
-  }
+/* Stacked directly on top of each other, filling the pinned viewport —
+   this is what actually makes the handoff read as "one replaces the
+   other in place" rather than "two blocks separated in normal flow."
+   `position: absolute` here also gives `.sceneCore` its own containing
+   block for the HUD panels (CoreLog etc., `position: absolute` in their
+   own CSS) to anchor to — no separate `position: relative` needed
+   alongside it (that would have discarded the `inset: 0` fill behavior
+   instead of just adding to it, caught before this ever ran live). */
+.chamber:not([data-static]) .sceneCore,
+.chamber:not([data-static]) .sceneIdentity {
+  position: absolute;
+  inset: 0;
+  justify-content: center;
+  padding: 56px 16px 24px;
 }
 
-.panelRow {
+/* Pass 26: 280px was a flat cap regardless of how much real chamber width
+   was available — on anything wider than ~1050px (the 58vw crossover),
+   the object stayed pinned at 280px no matter how much emptier the
+   chamber around it got, which is most real desktop traffic. Switched to
+   a vw-driven target with a higher ceiling so it actually grows with the
+   room it has, instead of reading as a fixed-size icon adrift in
+   whatever space the viewport happens to leave around it. The draw
+   routine's own line/node weights were bumped alongside this (see
+   SpatialObject.tsx) so the geometry gains real visual weight at the
+   larger size instead of just spreading its existing thinness out. */
+.spatialWrap {
+  width: min(380px, 34vw);
+  margin: 0 auto 22px;
+}
+
+.wordmark {
+  margin-bottom: 20px;
+  color: var(--term-fg);
+  overflow-x: auto;
   display: flex;
-  gap: 20px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border-15);
+  justify-content: center;
 }
 
-.panelRow:last-child {
-  border-bottom: none;
+.hero {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  /* The chamber's own background/border spans the full viewport, but the
+     actual readable content still lines up with the same ~900px column
+     every other section on the site uses — the chamber is atmosphere,
+     not an invitation to stretch text across an ultrawide monitor. */
+  width: 100%;
+  max-width: 900px;
+  /* A deliberate pause before the page hands off to Capabilities — the
+     "compression → expansion → focus → release" rhythm the hero/section
+     boundary was missing when every section used identical spacing.
+     Combines with SectionDivider's own 40px top margin for a real beat,
+     not just the same rhythm as every other section-to-section gap. */
+  margin-bottom: 12px;
 }
 
-.panelIndex {
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  color: var(--fg-muted);
+.portrait {
+  flex-shrink: 0;
+  padding-top: 4px;
+  position: relative;
+  /* Confines DotField's negative z-index to just this box, so it recedes
+     behind the ASCII layers without any risk of bleeding behind unrelated
+     page content further up the stacking order. */
+  isolation: isolate;
 }
 
-.panelText {
+.intro {
   min-width: 0;
 }
 
-.panelTitle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--fg);
+/* Pass 18: real three-tier hierarchy — `.identity` (profile.role, the
+   actual job title) is now the poster-scale claim; `.role` (the tagline
+   sentence) is the structured secondary line beneath it; `.tags`/
+   `.bioBlock` below are system metadata, visually set apart with a rule
+   rather than reading as more paragraph text at the same weight. */
+.identity {
+  margin: 0 0 10px;
+  /* Capped rather than filling the column — Mascot.tsx (Nia's own on-page
+     character) deliberately wanders a reserved band near the right edge,
+     "clear of the body text" by that component's own design. Text running
+     flush to the column's edge encroaches on that band; a sensible
+     editorial measure keeps a real margin there regardless of viewport
+     width, without needing to touch Mascot's own logic at all. */
+  max-width: 22ch;
+  font-size: 2.3rem;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--term-fg);
 }
 
-@media (min-width: 640px) {
-  .panelTitle {
-    font-size: 1.125rem;
+.role {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--term-fg-dim);
+  max-width: 48ch;
+}
+
+/* States the tagline above, then immediately qualifies it — the same
+   "claim, then a quick undercut" rhythm as illoca.unseen.co's hero
+   (a small annotation qualifying the big claim next to it), rebuilt in
+   this site's own terminal-comment voice rather than their hand-drawn
+   annotation device. */
+.undercut {
+  margin: 0 0 16px;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--term-muted);
+  max-width: 48ch;
+}
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  margin-left: 6px;
+  background: var(--term-accent);
+  box-shadow: 0 0 12px 1px var(--term-accent-glow);
+  vertical-align: text-bottom;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
   }
 }
 
-.panelChevron {
-  color: var(--fg-muted);
-  transition: transform 0.2s var(--ease-standard), color 0.2s var(--ease-standard);
+.tags {
+  margin: 0 0 16px;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--term-mint);
 }
 
-.panelRow:hover .panelChevron {
-  transform: translateX(2px);
-  color: var(--fg);
+/* A visual rule setting the bio paragraphs apart as annotation/metadata
+   rather than a continuation of the tagline's flowing prose — the same
+   "left border = subordinate detail" language used for the terminal
+   command scrollback elsewhere on the site. */
+.bioBlock {
+  margin-top: 6px;
+  padding-left: 14px;
+  border-left: 2px solid var(--term-border);
 }
 
-.panelBody {
-  margin: 6px 0 0;
-  font-size: 0.85rem;
+.bioLine {
+  margin: 0 0 10px;
+  color: var(--term-muted);
+  font-size: 0.8rem;
   line-height: 1.6;
-  color: var(--fg-muted);
+  max-width: 46ch;
+}
+
+.bioLine:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .identity {
+    font-size: 1.7rem;
+  }
+
+  .role {
+    font-size: 0.95rem;
+  }
+
+  .spatialWrap {
+    width: min(240px, 56vw);
+  }
 }

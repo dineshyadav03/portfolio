@@ -1,37 +1,4 @@
-/* Pass 37: full identity pivot, on explicit request — the homepage (and,
-   in a follow-up pass, the rest of the site) moves to a single dark
-   cinematic identity: near-black background, white type, and a
-   frosted-glass token family for panels/badges/CTAs. No light theme
-   here on purpose — glassmorphism reads correctly against a dark ground
-   and doesn't translate to a light one, and the reference this is
-   modeled on (genre-level, not copied verbatim — see
-   memory/feedback_original_not_copied.md) is dark-only too.
-
-   The old --term-* tokens below are kept ALIVE (dark values only, no
-   light-mode override block — ThemeToggle/lib/theme.ts are gone) purely
-   as a bridge: /creations, /contact, /reflections and their components
-   still read these directly and would otherwise render with undefined
-   CSS variables the moment this file changed, even though this pass
-   doesn't touch their own code. Remove this block once those pages get
-   migrated to the new tokens in the follow-up pass. */
 :root {
-  --bg: #0a0a0a;
-  --fg: #ffffff;
-  --fg-dim: rgba(255, 255, 255, 0.75);
-  --fg-muted: rgba(255, 255, 255, 0.55);
-  --glass-10: rgba(255, 255, 255, 0.1);
-  --glass-15: rgba(255, 255, 255, 0.15);
-  --glass-25: rgba(255, 255, 255, 0.25);
-  --border-15: rgba(255, 255, 255, 0.15);
-  --border-20: rgba(255, 255, 255, 0.2);
-  --border-25: rgba(255, 255, 255, 0.25);
-  /* The one entrance/reveal easing curve used across the whole site — see
-     lib/motion.ts's `EASE` for the framer-motion side of the same curve.
-     Not terminal-specific, just a good default "settle" feel — kept as
-     the one thing both identities share. */
-  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* --- legacy bridge tokens, still read by not-yet-migrated pages --- */
   --term-bg: #000000;
   --term-titlebar: #0a0a0a;
   --term-border: #2a2a2a;
@@ -43,9 +10,61 @@
   --term-mint: #bcd6ad;
   --term-selection: #ff5a2e;
   --page-bg: #000000;
+  /* Pass 27: reverted to pure black on explicit request — Pass 23's
+     #141414 (below) was a deliberate attempt to give the chamber contrast
+     against --page-bg, but in practice that read as a visible grey box
+     sitting on top of the page rather than a "distinct region," which is
+     the opposite of this site's established flattened, no-boxed-card
+     ethos (TerminalWindow itself was flattened for the same reason — see
+     [[project-portfolio-overview]]). The chamber still reads as its own
+     region via the dotted border-bottom rule (app/page.module.css)
+     without needing a background delta at all. Kept equal to --page-bg
+     rather than removing the token, since GlobeContact and other
+     components may still want a named "panel" concept later.
+     Pass 23's original reasoning, for reference: a reuse of
+     --term-titlebar (#0a0a0a, shared by six other thin-strip UI elements)
+     was only a 4% raw delta from --page-bg — under dark-luminance
+     perceptual contrast (Weber's law), effectively invisible. #141414
+     fixed that gap but overshot into looking like a separate panel. */
   --chamber-bg: #000000;
+  /* For the floating pill nav (Nav.module.css) — semi-transparent so
+     content visibly scrolls underneath it (paired with backdrop-filter:
+     blur there), rather than reading as another solid opaque panel like
+     --chamber-bg was explicitly moved away from being, above. */
   --term-glass-bg: rgba(0, 0, 0, 0.72);
+  /* The one entrance/reveal easing curve used across the whole site —
+     see lib/motion.ts's `EASE`/`EASE_CSS` for the framer-motion side of
+     the same curve. Module CSS transitions should reference this instead
+     of the generic `ease`/`ease-out` keywords, so a hover state and a
+     scroll reveal settle with the same physical character. Continuous
+     pointer-driven motion (tile tilt, SpatialObject) intentionally stays
+     on damp()'s exponential decay instead — a different, physically
+     correct model for that kind of interaction, not a curve mismatch. */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Room reserved above content for the floating pill nav (Nav.module.css,
+     `position: fixed`) — shared between layout.module.css's `.stage`
+     padding and TerminalWindow's own homepage counter-margin (see that
+     component) so the two stay in sync instead of two independently
+     hand-tuned magic numbers. */
   --nav-clearance: 84px;
+}
+
+:root[data-theme="light"] {
+  --term-bg: #f5f1e8;
+  --term-titlebar: #ece3d0;
+  --term-border: #d9cfba;
+  --term-fg: #241f16;
+  --term-fg-dim: #5c5340;
+  --term-muted: #7a7059;
+  --term-accent: #d9490f;
+  --term-accent-glow: rgba(217, 73, 15, 0.25);
+  --term-mint: #3f6b30;
+  --term-selection: #d9490f;
+  --page-bg: #f5f1e8;
+  /* Light theme's --term-titlebar (#ece3d0) already reads clearly against
+     --page-bg (#f5f1e8) — confirmed live, no change needed here. */
+  --chamber-bg: #ece3d0;
+  --term-glass-bg: rgba(245, 241, 232, 0.78);
 }
 
 * {
@@ -58,7 +77,7 @@ body {
 }
 
 /* The page still scrolls — just without the browser's default scrollbar
-   chrome, which clashes with the full-bleed cinematic look. */
+   chrome, which clashes with the custom terminal look. */
 html {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -70,19 +89,32 @@ html::-webkit-scrollbar {
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  background: var(--page-bg);
+  color: var(--term-fg);
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {
   color: inherit;
 }
 
+/* Fixed film-grain layer: breaks up the flat dark background so it reads
+   as a surface rather than a solid digital fill. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
 ::selection {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--fg);
+  background: var(--term-selection);
+  color: #180800;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -97,8 +129,8 @@ a {
 }
 
 /* Visually hidden but present for screen readers/SEO — for real heading
-   text where the visible equivalent is styled/decorative rather than
-   plain readable text. */
+   text where the visible equivalent is a decorative, non-text rendering
+   (e.g. the dot-matrix wordmark) rather than actual readable text. */
 .srOnly {
   position: absolute;
   width: 1px;
@@ -115,8 +147,8 @@ a {
   position: absolute;
   left: -9999px;
   top: 0;
-  background: var(--fg);
-  color: #0a0a0a;
+  background: var(--term-accent);
+  color: #180800;
   padding: 8px 14px;
   border-radius: 6px;
   z-index: 100;

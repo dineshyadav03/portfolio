@@ -1,19 +1,28 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { MotionConfig } from "framer-motion";
 import "./globals.css";
 import styles from "./layout.module.css";
 import { profile } from "@/lib/content";
 import BackToTop from "@/components/BackToTop";
+import StatusBar from "@/components/StatusBar";
+import KeyboardNav from "@/components/KeyboardNav";
+import TerminalWindow from "@/components/TerminalWindow";
 import PageTransition from "@/components/PageTransition";
-import Navbar from "@/components/Navbar";
+import Nav from "@/components/Nav";
+import PageToc from "@/components/PageToc";
 import ScrollProgress from "@/components/ScrollProgress";
+import BootIntro from "@/components/BootIntro";
+import Mascot from "@/components/Mascot";
+import ScrollHint from "@/components/ScrollHint";
 import SmoothScroll from "@/components/SmoothScroll";
+import SystemField from "@/components/SystemField";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
-const sans = Inter({
-  variable: "--font-sans",
+const mono = Geist_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 const titleString = `${profile.name} — ${profile.role}`;
@@ -54,8 +63,15 @@ const personJsonLd = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={sans.variable} suppressHydrationWarning>
+    <html lang="en" className={mono.variable} suppressHydrationWarning>
       <body>
+        {/* Sets data-theme before first paint so the page never flashes the
+            wrong theme while React hydrates. */}
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
         {/* Server-rendered, non-executable data — a plain <script> tag here
             (this is a Server Component) is standard practice for JSON-LD. */}
         <script
@@ -65,21 +81,50 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a href="#main" className="skipLink">
           Skip to content
         </a>
+        {/* Behind everything, including .grain — the ambient sitewide dot
+            field (see components/SystemField.tsx). */}
+        <SystemField />
+        <div className="grain" aria-hidden="true" />
+        <KeyboardNav />
         <SmoothScroll />
-        {/* Full-width fixed glass nav (Pass 37's new identity) — replaces
-            the previous floating pill (Nav.tsx, kept for the not-yet-
-            migrated inner pages' own reference, not mounted here anymore).
-            Site-wide, not homepage-only — this is primary navigation. */}
-        <Navbar />
-        {/* Site-wide (every route). */}
+        {/* Floating pill nav — moved out of TerminalWindow's title bar on
+            request ("floating curved nav"). Same containing-block reason
+            as PageToc/ScrollProgress below: TerminalWindow's own
+            motion.div carries a persistent transform once its entrance
+            settles, which would silently break a genuine `position:
+            fixed` if this stayed nested inside it. Site-wide, not
+            homepage-only — this is primary navigation, unlike PageToc's
+            homepage-specific jump links. */}
+        <Nav />
+        {/* `position: fixed`, homepage-only (checked internally via
+            usePathname — see components/PageToc.tsx). Mounted here,
+            outside TerminalWindow/PageTransition, deliberately: their own
+            motion.div wrappers carry animated transforms, which make an
+            element "fixed" relative to that box instead of the real
+            viewport — confirmed live, this silently breaks otherwise. */}
+        <PageToc />
+        {/* Same containing-block reasoning as PageToc above — mounted
+            outside TerminalWindow/PageTransition so `position: fixed`
+            stays genuinely viewport-relative. Site-wide (every route),
+            unlike PageToc which is homepage-only. */}
         <ScrollProgress />
-        {/* Site-wide, every viewport width — any route can get long enough
-            to want a way back to the top. */}
+        {/* Same containing-block reasoning as PageToc/ScrollProgress above.
+            Site-wide, every viewport width — unlike PageToc, any route can
+            get long enough to want a way back to the top, not just the
+            homepage's wide-viewport case. */}
         <BackToTop />
         <MotionConfig reducedMotion="user">
-          <main id="main" className={styles.mainCol}>
-            <PageTransition>{children}</PageTransition>
-          </main>
+          <BootIntro />
+          <Mascot />
+          <ScrollHint />
+          <div className={styles.stage}>
+            <main id="main" className={styles.mainCol}>
+              <TerminalWindow>
+                <PageTransition>{children}</PageTransition>
+              </TerminalWindow>
+            </main>
+            <StatusBar />
+          </div>
         </MotionConfig>
       </body>
     </html>

@@ -1,24 +1,27 @@
+.stage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Extra top clearance — the floating pill nav (Nav.module.css) is
+     `position: fixed` at the true viewport top now, independent of this
+     box's own layout, and without this it visibly overlapped the terminal
+     window's own title-bar text underneath it (confirmed live). This
+     reserves real, permanent room for it instead of letting it float over
+     content that was never designed to have something on top of it.
+     TerminalWindow cancels this same amount (--nav-clearance, globals.css)
+     with its own negative margin on the homepage specifically, where
+     there's no titlebar text left to protect it from (see that
+     component) — so the hero's own background can start flush at the
+     true top instead of showing a gap of bare page background above it. */
+  padding: var(--nav-clearance) 16px 32px;
+  gap: 0;
+}
+
 .mainCol {
   display: flex;
   flex-direction: column;
-  /* `stretch` (the flex default), not `center` — the new identity's
-     sections span close to the full page width themselves (each capped
-     at its own max-width and centering its own content internally, see
-     page.module.css), unlike the old design's single narrow centered
-     terminal column. `center` here left every child shrink-wrapped to
-     its own content's natural width instead of the page's real width —
-     confirmed live at 1400px: the whole hero rendered in a ~180px box in
-     the corner instead of spanning the viewport. */
-  align-items: stretch;
+  align-items: center;
   width: 100%;
-  /* Clearance for the fixed Navbar above (Navbar.module.css) — reuses the
-     same value the previous floating-pill nav relied on (globals.css's
-     --nav-clearance), since it's already a proven-safe amount rather than
-     a freshly invented number. The homepage's HeroBackground canvas is
-     `position: fixed` at z-index 0 regardless of this padding, so it
-     still fills the full viewport (including behind the transparent
-     Navbar) — this padding only affects where actual page *content*
-     starts, matching the reference's own "section padding under the
-     fixed nav" convention rather than a full-bleed opt-out. */
-  padding-top: var(--nav-clearance);
 }
